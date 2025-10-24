@@ -32,21 +32,17 @@ export default function Shipping() {
 
                 <div>
                   <h3 className="font-semibold mb-2">Kargo Ücreti</h3>
-                  <p className="text-muted-foreground mb-2">
-                    Kargo ücreti sepet tutarınıza göre değişmektedir:
+                  <p className="text-muted-foreground">
+                    Tüm ürünlerimizde kargo tamamen ücretsizdir. Sepet tutarından bağımsız olarak 
+                    siparişiniz ücretsiz kargo ile adresinize teslim edilir.
                   </p>
-                  <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                    <li>500 TL üzeri alışverişlerde kargo ücretsizdir</li>
-                    <li>500 TL altı alışverişlerde kargo ücreti 29,90 TL'dir</li>
-                    <li>Bazı büyük boy ürünlerde ek kargo ücreti uygulanabilir</li>
-                  </ul>
                 </div>
 
                 <div>
                   <h3 className="font-semibold mb-2">Kargo Firması</h3>
                   <p className="text-muted-foreground">
-                    Siparişleriniz anlaşmalı kargo firmalarımız (Aras Kargo, Yurtiçi Kargo, MNG Kargo) 
-                    aracılığıyla gönderilmektedir. Kargo takip numaranız e-posta adresinize gönderilecektir.
+                    Siparişleriniz Sürat Kargo ve diğer anlaşmalı kargo firmalarımız aracılığıyla 
+                    gönderilmektedir. Kargo takip numaranız e-posta adresinize gönderilecektir.
                   </p>
                 </div>
 
