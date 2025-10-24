@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export const Footer = () => {
   return (
     <footer className="border-t bg-muted/50 mt-auto">
@@ -12,7 +14,11 @@ export const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Kurumsal</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="hover:text-foreground cursor-pointer">Hakkımızda</li>
+              <li>
+                <Link to="/about" className="hover:text-foreground">
+                  Hakkımızda
+                </Link>
+              </li>
               <li className="hover:text-foreground cursor-pointer">İletişim</li>
               <li className="hover:text-foreground cursor-pointer">Kariyer</li>
             </ul>
@@ -20,8 +26,16 @@ export const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Yardım</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="hover:text-foreground cursor-pointer">SSS</li>
-              <li className="hover:text-foreground cursor-pointer">Kargo & İade</li>
+              <li>
+                <Link to="/faq" className="hover:text-foreground">
+                  SSS
+                </Link>
+              </li>
+              <li>
+                <Link to="/shipping" className="hover:text-foreground">
+                  Kargo & İade
+                </Link>
+              </li>
               <li className="hover:text-foreground cursor-pointer">Ödeme Yöntemleri</li>
             </ul>
           </div>
