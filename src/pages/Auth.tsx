@@ -1,111 +1,134 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { z } from "zod";
 
-export default function Auth() {
+const emailSchema = z.string().email("Geçerli bir e-posta adresi giriniz");
+const passwordSchema = z.string().min(6, "Şifre en az 6 karakter olmalıdır");
+
+const Auth = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
+  const [signupFullName, setSignupFullName] = useState("");
+  const [signupPhone, setSignupPhone] = useState("");
 
-  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    if (user) {
+      const redirect = searchParams.get("redirect") || "/";
+      navigate(redirect);
+    }
+  }, [user, navigate, searchParams]);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    
+    try {
+      emailSchema.parse(loginEmail);
+      passwordSchema.parse(loginPassword);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Hata",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
 
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("signup-email") as string;
-    const password = formData.get("signup-password") as string;
-    const fullName = formData.get("full-name") as string;
+    setIsLoading(true);
+    
+    const { error } = await supabase.auth.signInWithPassword({
+      email: loginEmail,
+      password: loginPassword,
+    });
 
+    setIsLoading(false);
+
+    if (error) {
+      toast({
+        title: "Giriş Başarısız",
+        description: error.message === "Invalid login credentials" 
+          ? "E-posta veya şifre hatalı" 
+          : error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const redirect = searchParams.get("redirect") || "/";
+    navigate(redirect);
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      emailSchema.parse(signupEmail);
+      passwordSchema.parse(signupPassword);
+      z.string().min(3, "İsim en az 3 karakter olmalıdır").parse(signupFullName);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Hata",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    setIsLoading(true);
+    
+    const redirectUrl = `${window.location.origin}/`;
+    
     const { error } = await supabase.auth.signUp({
-      email,
-      password,
+      email: signupEmail,
+      password: signupPassword,
       options: {
+        emailRedirectTo: redirectUrl,
         data: {
-          full_name: fullName,
+          full_name: signupFullName,
+          phone: signupPhone,
         },
-        emailRedirectTo: `${window.location.origin}/`,
       },
     });
 
+    setIsLoading(false);
+
     if (error) {
       toast({
-        title: "Kayıt Hatası",
-        description: error.message,
+        title: "Kayıt Başarısız",
+        description: error.message === "User already registered" 
+          ? "Bu e-posta adresi zaten kayıtlı" 
+          : error.message,
         variant: "destructive",
       });
-    } else {
-      toast({
-        title: "Kayıt Başarılı",
-        description: "Hesabınız oluşturuldu. Giriş yapabilirsiniz.",
-      });
+      return;
     }
 
-    setLoading(false);
-  };
-
-  const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("signin-email") as string;
-    const password = formData.get("signin-password") as string;
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+    toast({
+      title: "Kayıt Başarılı",
+      description: "Hesabınız oluşturuldu. Giriş yapabilirsiniz.",
     });
-
-    if (error) {
-      toast({
-        title: "Giriş Hatası",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Giriş Başarılı",
-        description: "Hoş geldiniz!",
-      });
-      navigate("/");
-    }
-
-    setLoading(false);
-  };
-
-  const handlePasswordReset = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("reset-email") as string;
-
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth`,
-    });
-
-    if (error) {
-      toast({
-        title: "Hata",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "E-posta Gönderildi",
-        description: "Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.",
-      });
-    }
-
-    setLoading(false);
   };
 
   return (
@@ -114,10 +137,9 @@ export default function Auth() {
       <main className="flex-1 container py-8">
         <div className="max-w-md mx-auto">
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Giriş Yap</TabsTrigger>
               <TabsTrigger value="signup">Üye Ol</TabsTrigger>
-              <TabsTrigger value="reset">Şifre Sıfırla</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin">
@@ -129,14 +151,15 @@ export default function Auth() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleSignIn} className="space-y-4">
+                  <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="signin-email">E-posta</Label>
                       <Input
                         id="signin-email"
-                        name="signin-email"
                         type="email"
                         placeholder="ornek@email.com"
+                        value={loginEmail}
+                        onChange={(e) => setLoginEmail(e.target.value)}
                         required
                       />
                     </div>
@@ -144,13 +167,14 @@ export default function Auth() {
                       <Label htmlFor="signin-password">Şifre</Label>
                       <Input
                         id="signin-password"
-                        name="signin-password"
                         type="password"
+                        value={loginPassword}
+                        onChange={(e) => setLoginPassword(e.target.value)}
                         required
                       />
                     </div>
-                    <Button type="submit" className="w-full" disabled={loading}>
-                      {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? "Giriş yapılıyor..." : "Giriş Yap"}
                     </Button>
                   </form>
                 </CardContent>
@@ -166,67 +190,52 @@ export default function Auth() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleSignUp} className="space-y-4">
+                  <form onSubmit={handleSignup} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="full-name">Ad Soyad</Label>
+                      <Label htmlFor="full-name">Ad Soyad *</Label>
                       <Input
                         id="full-name"
-                        name="full-name"
                         type="text"
                         placeholder="Ad Soyad"
+                        value={signupFullName}
+                        onChange={(e) => setSignupFullName(e.target.value)}
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="signup-email">E-posta</Label>
+                      <Label htmlFor="phone">Telefon (Opsiyonel)</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="+90 5XX XXX XX XX"
+                        value={signupPhone}
+                        onChange={(e) => setSignupPhone(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-email">E-posta *</Label>
                       <Input
                         id="signup-email"
-                        name="signup-email"
                         type="email"
                         placeholder="ornek@email.com"
+                        value={signupEmail}
+                        onChange={(e) => setSignupEmail(e.target.value)}
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="signup-password">Şifre</Label>
+                      <Label htmlFor="signup-password">Şifre * (En az 6 karakter)</Label>
                       <Input
                         id="signup-password"
-                        name="signup-password"
                         type="password"
+                        value={signupPassword}
+                        onChange={(e) => setSignupPassword(e.target.value)}
                         required
                         minLength={6}
                       />
                     </div>
-                    <Button type="submit" className="w-full" disabled={loading}>
-                      {loading ? "Kayıt yapılıyor..." : "Üye Ol"}
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="reset">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Şifre Sıfırla</CardTitle>
-                  <CardDescription>
-                    E-posta adresinize şifre sıfırlama bağlantısı göndereceğiz
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handlePasswordReset} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="reset-email">E-posta</Label>
-                      <Input
-                        id="reset-email"
-                        name="reset-email"
-                        type="email"
-                        placeholder="ornek@email.com"
-                        required
-                      />
-                    </div>
-                    <Button type="submit" className="w-full" disabled={loading}>
-                      {loading ? "Gönderiliyor..." : "Şifre Sıfırlama Bağlantısı Gönder"}
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? "Kayıt yapılıyor..." : "Üye Ol"}
                     </Button>
                   </form>
                 </CardContent>
@@ -238,4 +247,6 @@ export default function Auth() {
       <Footer />
     </div>
   );
-}
+};
+
+export default Auth;

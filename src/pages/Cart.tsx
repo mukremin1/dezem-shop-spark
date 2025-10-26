@@ -5,14 +5,30 @@ import { Card } from "@/components/ui/card";
 import { ArrowLeft, ShoppingBag, Trash2, Plus, Minus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
+import { useAuth } from "@/hooks/useAuth";
+import { useState } from "react";
 
 const Cart = () => {
   const navigate = useNavigate();
   const { items, removeItem, updateQuantity, getTotalPrice } = useCart();
+  const { user, loading: authLoading } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const shippingCost = items.length > 0 ? 39.99 : 0;
   const subtotal = getTotalPrice();
   const total = subtotal + shippingCost;
+
+  const handleCheckout = () => {
+    if (!authLoading && !user) {
+      navigate("/auth?redirect=/checkout");
+      return;
+    }
+    
+    if (items.length === 0) return;
+    
+    setIsSubmitting(true);
+    navigate("/checkout");
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -123,8 +139,13 @@ const Cart = () => {
                     <span className="text-primary">₺{total.toFixed(2)}</span>
                   </div>
                 </div>
-                <Button className="w-full" size="lg">
-                  Sipariş Ver
+                <Button 
+                  className="w-full" 
+                  size="lg"
+                  disabled={isSubmitting || items.length === 0}
+                  onClick={handleCheckout}
+                >
+                  {isSubmitting ? "Yönlendiriliyor..." : "Sipariş Ver"}
                 </Button>
               </Card>
             </div>
