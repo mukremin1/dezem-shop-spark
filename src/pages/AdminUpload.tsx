@@ -93,6 +93,78 @@ const AdminUpload = () => {
     window.open('/products-template.xlsx', '_blank');
   };
 
+  const handleAutoUpload = async () => {
+    setIsUploading(true);
+    try {
+      const response = await fetch('/products-data.xlsx');
+      const arrayBuffer = await response.arrayBuffer();
+      
+      const workbook = XLSX.read(arrayBuffer);
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      console.log("Excel data:", jsonData);
+
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const row of jsonData as any[]) {
+        try {
+          const productData = {
+            name: row['Ürün Adı'] || '',
+            slug: (row['Ürün Adı'] || '')
+              .toLowerCase()
+              .replace(/ğ/g, 'g')
+              .replace(/ü/g, 'u')
+              .replace(/ş/g, 's')
+              .replace(/ı/g, 'i')
+              .replace(/ö/g, 'o')
+              .replace(/ç/g, 'c')
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/(^-|-$)/g, ''),
+            price: parseFloat(row["Trendyol'da Satılacak Fiyat (KDV Dahil)"] || '0'),
+            compare_price: row['Piyasa Satış Fiyatı (KDV Dahil)'] ? parseFloat(row['Piyasa Satış Fiyatı (KDV Dahil)'] || '0') : null,
+            description: row['Ürün Açıklaması'] || '',
+            stock_quantity: parseInt(row['Ürün Stok Adedi'] || '0'),
+            sku: row['Model Kodu'] || row['Tedarikçi Stok Kodu'] || '',
+            barcode: row['Barkod'] || '',
+            is_active: true,
+            is_featured: false,
+            is_digital: false,
+          };
+
+          const { error } = await supabase
+            .from('products')
+            .insert(productData);
+
+          if (error) {
+            console.error('Product insert error:', error, productData);
+            errorCount++;
+          } else {
+            successCount++;
+          }
+        } catch (err) {
+          console.error('Row processing error:', err, row);
+          errorCount++;
+        }
+      }
+
+      toast({
+        title: "Ürün Yükleme Tamamlandı",
+        description: `${successCount} ürün başarıyla yüklendi. ${errorCount > 0 ? `${errorCount} ürün yüklenemedi.` : ''}`,
+      });
+    } catch (error) {
+      console.error('File processing error:', error);
+      toast({
+        title: "Hata",
+        description: "Dosya işlenirken bir hata oluştu.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <div className="container mx-auto py-8 px-4">
       <Card className="max-w-2xl mx-auto">
@@ -104,6 +176,15 @@ const AdminUpload = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
+            <Button
+              variant="default"
+              onClick={handleAutoUpload}
+              disabled={isUploading}
+              className="w-full"
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              {isUploading ? "Yükleniyor..." : "Tüm Ürünleri Otomatik Yükle"}
+            </Button>
             <Button
               variant="outline"
               onClick={downloadTemplate}
