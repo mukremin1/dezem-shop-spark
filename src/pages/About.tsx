@@ -49,6 +49,20 @@ export default function About() {
                 Sorularınız, önerileriniz veya destek talepleriniz için bizimle iletişime geçebilirsiniz.
                 Müşteri hizmetleri ekibimiz size yardımcı olmaktan mutluluk duyacaktır.
               </p>
+              <div className="space-y-2 pt-4">
+                <p className="text-muted-foreground">
+                  <strong>Email:</strong>{" "}
+                  <a href="mailto:destek@dezemu.com" className="hover:text-primary">
+                    destek@dezemu.com
+                  </a>
+                </p>
+                <p className="text-muted-foreground">
+                  <strong>Telefon:</strong>{" "}
+                  <a href="tel:+905395263293" className="hover:text-primary">
+                    +90 539 526 32 93
+                  </a>
+                </p>
+              </div>
             </section>
           </div>
         </div>

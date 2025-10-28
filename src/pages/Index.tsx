@@ -4,8 +4,14 @@ import { ProductCard } from "@/components/ProductCard";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
+import { useSearchParams } from "react-router-dom";
 
 const Index = () => {
+  const [searchParams] = useSearchParams();
+  const categoryFilter = searchParams.get("category");
+
   const { data: products, isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
@@ -24,24 +30,28 @@ const Index = () => {
   });
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header />
-      <main className="flex-1">
-        {/* Hero Section */}
-        <section className="bg-gradient-to-r from-primary/10 via-primary/5 to-background py-20">
-          <div className="container">
-            <div className="max-w-3xl">
-              <h1 className="text-4xl md:text-6xl font-bold mb-6">
-                En İyi Ürünler,
-                <br />
-                <span className="text-primary">En İyi Fiyatlar</span>
-              </h1>
-              <p className="text-xl text-muted-foreground mb-8">
-                Fiziksel ve dijital ürünleriniz için güvenilir alışveriş platformu
-              </p>
-            </div>
-          </div>
-        </section>
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full">
+        <AppSidebar />
+        <div className="flex flex-col flex-1 w-full">
+          <Header />
+          <main className="flex-1">
+            {/* Hero Section */}
+            <section className="bg-gradient-to-r from-primary/10 via-primary/5 to-background py-20">
+              <div className="container">
+                <div className="flex items-center gap-4 mb-8">
+                  <SidebarTrigger />
+                  <h1 className="text-4xl md:text-6xl font-bold">
+                    En İyi Ürünler,
+                    <br />
+                    <span className="text-primary">En İyi Fiyatlar</span>
+                  </h1>
+                </div>
+                <p className="text-xl text-muted-foreground max-w-3xl">
+                  Fiziksel ve dijital ürünleriniz için güvenilir alışveriş platformu
+                </p>
+              </div>
+            </section>
 
         {/* Featured Products */}
         <section className="py-16">
@@ -81,10 +91,12 @@ const Index = () => {
               </div>
             )}
           </div>
-        </section>
-      </main>
-      <Footer />
-    </div>
+          </section>
+          </main>
+          <Footer />
+        </div>
+      </div>
+    </SidebarProvider>
   );
 };
 

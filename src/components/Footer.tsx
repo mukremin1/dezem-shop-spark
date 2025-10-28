@@ -19,8 +19,16 @@ export const Footer = () => {
                   Hakkımızda
                 </Link>
               </li>
-              <li className="hover:text-foreground cursor-pointer">İletişim</li>
-              <li className="hover:text-foreground cursor-pointer">Kariyer</li>
+              <li>
+                <a href="mailto:destek@dezemu.com" className="hover:text-foreground">
+                  destek@dezemu.com
+                </a>
+              </li>
+              <li>
+                <a href="tel:+905395263293" className="hover:text-foreground">
+                  +90 539 526 32 93
+                </a>
+              </li>
             </ul>
           </div>
           <div>
