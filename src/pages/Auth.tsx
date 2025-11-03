@@ -11,6 +11,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
+import { Chrome } from "lucide-react";
 
 const emailSchema = z.string().email("Geçerli bir e-posta adresi giriniz");
 const passwordSchema = z.string().min(6, "Şifre en az 6 karakter olmalıdır");
@@ -131,6 +132,28 @@ const Auth = () => {
     });
   };
 
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    const redirectUrl = `${window.location.origin}/`;
+    
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: redirectUrl,
+      },
+    });
+
+    setIsLoading(false);
+
+    if (error) {
+      toast({
+        title: "Google Girişi Başarısız",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -175,6 +198,26 @@ const Auth = () => {
                     </div>
                     <Button type="submit" className="w-full" disabled={isLoading}>
                       {isLoading ? "Giriş yapılıyor..." : "Giriş Yap"}
+                    </Button>
+                    <div className="relative my-4">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">
+                          veya
+                        </span>
+                      </div>
+                    </div>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      className="w-full" 
+                      onClick={handleGoogleLogin}
+                      disabled={isLoading}
+                    >
+                      <Chrome className="mr-2 h-4 w-4" />
+                      Google ile Giriş Yap
                     </Button>
                   </form>
                 </CardContent>
@@ -236,6 +279,26 @@ const Auth = () => {
                     </div>
                     <Button type="submit" className="w-full" disabled={isLoading}>
                       {isLoading ? "Kayıt yapılıyor..." : "Üye Ol"}
+                    </Button>
+                    <div className="relative my-4">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">
+                          veya
+                        </span>
+                      </div>
+                    </div>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      className="w-full" 
+                      onClick={handleGoogleLogin}
+                      disabled={isLoading}
+                    >
+                      <Chrome className="mr-2 h-4 w-4" />
+                      Google ile Üye Ol
                     </Button>
                   </form>
                 </CardContent>
