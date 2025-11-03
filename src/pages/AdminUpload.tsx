@@ -4,11 +4,112 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import * as XLSX from "xlsx";
-import { Upload, Download } from "lucide-react";
+import { Upload, Download, Plus } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const productFormSchema = z.object({
+  name: z.string().min(1, "Ürün adı zorunludur"),
+  category_id: z.string().optional(),
+  price: z.string().min(1, "Fiyat zorunludur"),
+  compare_price: z.string().optional(),
+  description: z.string().optional(),
+  short_description: z.string().optional(),
+  stock_quantity: z.string().min(1, "Stok miktarı zorunludur"),
+  sku: z.string().optional(),
+  barcode: z.string().optional(),
+});
 
 const AdminUpload = () => {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('name');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const form = useForm<z.infer<typeof productFormSchema>>({
+    resolver: zodResolver(productFormSchema),
+    defaultValues: {
+      name: "",
+      category_id: "",
+      price: "",
+      compare_price: "",
+      description: "",
+      short_description: "",
+      stock_quantity: "0",
+      sku: "",
+      barcode: "",
+    },
+  });
+
+  const onSubmit = async (values: z.infer<typeof productFormSchema>) => {
+    setIsUploading(true);
+    try {
+      const slug = values.name
+        .toLowerCase()
+        .replace(/ğ/g, 'g')
+        .replace(/ü/g, 'u')
+        .replace(/ş/g, 's')
+        .replace(/ı/g, 'i')
+        .replace(/ö/g, 'o')
+        .replace(/ç/g, 'c')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+
+      const productData = {
+        name: values.name,
+        slug,
+        price: parseFloat(values.price),
+        compare_price: values.compare_price ? parseFloat(values.compare_price) : null,
+        description: values.description || null,
+        short_description: values.short_description || null,
+        stock_quantity: parseInt(values.stock_quantity),
+        sku: values.sku || null,
+        barcode: values.barcode || null,
+        category_id: values.category_id || null,
+        is_active: true,
+        is_featured: false,
+        is_digital: false,
+      };
+
+      const { error } = await supabase
+        .from('products')
+        .insert(productData);
+
+      if (error) throw error;
+
+      toast({
+        title: "Başarılı",
+        description: "Ürün başarıyla eklendi.",
+      });
+
+      form.reset();
+    } catch (error) {
+      console.error('Product insert error:', error);
+      toast({
+        title: "Hata",
+        description: "Ürün eklenirken bir hata oluştu.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -252,10 +353,175 @@ const AdminUpload = () => {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto py-8 px-4 space-y-6">
+      {/* Manuel Ürün Ekleme Formu */}
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle>Ürün Yükleme Paneli</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Plus className="h-5 w-5" />
+            Yeni Ürün Ekle
+          </CardTitle>
+          <CardDescription>
+            Tek bir ürünü manuel olarak ekleyin
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ürün Adı *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ürün adı" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="category_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Kategori</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Kategori seçin" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Fiyat *</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.01" placeholder="0.00" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="compare_price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Eski Fiyat</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.01" placeholder="0.00" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="short_description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Kısa Açıklama</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Kısa açıklama" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Detaylı Açıklama</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Detaylı açıklama" rows={5} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="stock_quantity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Stok *</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="0" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="sku"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>SKU</FormLabel>
+                      <FormControl>
+                        <Input placeholder="SKU" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="barcode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Barkod</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Barkod" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <Button type="submit" disabled={isUploading} className="w-full">
+                <Plus className="mr-2 h-4 w-4" />
+                {isUploading ? "Ekleniyor..." : "Ürün Ekle"}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      {/* Excel Yükleme */}
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle>Toplu Ürün Yükleme</CardTitle>
           <CardDescription>
             Excel dosyanızı yükleyerek toplu ürün ekleyebilirsiniz
           </CardDescription>
