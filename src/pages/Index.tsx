@@ -176,19 +176,18 @@ const Index = () => {
             </section>
 
             {/* Quick Add Product (Admin Only) */}
-            {!adminLoading && (
+            {!adminLoading && isAdmin && (
               <section className="py-8 bg-muted/30">
                 <div className="container">
-                  {isAdmin ? (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Plus className="h-5 w-5" />
-                          Hızlı Ürün Ekle
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <form onSubmit={handleQuickAdd} className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Plus className="h-5 w-5" />
+                        Hızlı Ürün Ekle
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <form onSubmit={handleQuickAdd} className="grid grid-cols-1 md:grid-cols-5 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="quick-name">Ürün Adı *</Label>
                           <Input
@@ -249,15 +248,6 @@ const Index = () => {
                       </form>
                     </CardContent>
                   </Card>
-                  ) : (
-                    <Card className="border-destructive">
-                      <CardContent className="pt-6">
-                        <p className="text-center text-muted-foreground">
-                          Ürün eklemek için admin yetkisine ihtiyacınız var. Lütfen bir admin ile iletişime geçin.
-                        </p>
-                      </CardContent>
-                    </Card>
-                  )}
                 </div>
               </section>
             )}
