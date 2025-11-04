@@ -16,6 +16,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Switch } from "@/components/ui/switch";
+import { Upload } from "lucide-react";
+import * as XLSX from "xlsx";
 
 const Index = () => {
   const [searchParams] = useSearchParams();
@@ -30,6 +33,8 @@ const Index = () => {
   const [productPrice, setProductPrice] = useState("");
   const [productCategory, setProductCategory] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isActive, setIsActive] = useState(true);
+  const [isUploadingExcel, setIsUploadingExcel] = useState(false);
 
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
@@ -108,7 +113,7 @@ const Index = () => {
           price: parseFloat(productPrice),
           category_id: productCategory || null,
           stock_quantity: 100,
-          is_active: true,
+          is_active: isActive,
         })
         .select()
         .single();
@@ -136,6 +141,7 @@ const Index = () => {
       setProductImageUrl("");
       setProductPrice("");
       setProductCategory("");
+      setIsActive(true);
       
       // Ürünleri yenile
       refetch();
@@ -148,6 +154,139 @@ const Index = () => {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingExcel(true);
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data);
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const row of jsonData as any[]) {
+        try {
+          let categoryId = null;
+          const categoryName = row['Kategori'] || row['category'] || row['Category'];
+          
+          if (categoryName) {
+            const categorySlug = categoryName
+              .toLowerCase()
+              .replace(/ğ/g, 'g')
+              .replace(/ü/g, 'u')
+              .replace(/ş/g, 's')
+              .replace(/ı/g, 'i')
+              .replace(/ö/g, 'o')
+              .replace(/ç/g, 'c')
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/(^-|-$)/g, '');
+
+            const { data: existingCategory } = await supabase
+              .from('categories')
+              .select('id')
+              .eq('slug', categorySlug)
+              .maybeSingle();
+
+            if (existingCategory) {
+              categoryId = existingCategory.id;
+            } else {
+              const { data: newCategory, error: categoryError } = await supabase
+                .from('categories')
+                .insert({
+                  name: categoryName,
+                  slug: categorySlug,
+                })
+                .select('id')
+                .single();
+
+              if (!categoryError && newCategory) {
+                categoryId = newCategory.id;
+              }
+            }
+          }
+
+          const productName = row['Ürün Adı'] || row['name'] || row['Name'] || '';
+          const slug = productName
+            .toLowerCase()
+            .replace(/ğ/g, 'g')
+            .replace(/ü/g, 'u')
+            .replace(/ş/g, 's')
+            .replace(/ı/g, 'i')
+            .replace(/ö/g, 'o')
+            .replace(/ç/g, 'c')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+
+          const productData = {
+            name: productName,
+            slug,
+            price: parseFloat(row['Fiyat'] || row['price'] || row['Price'] || '0'),
+            compare_price: row['Eski Fiyat'] || row['compare_price'] ? parseFloat(row['Eski Fiyat'] || row['compare_price'] || '0') : null,
+            description: row['Açıklama'] || row['description'] || row['Description'] || '',
+            short_description: row['Kısa Açıklama'] || row['short_description'] || '',
+            stock_quantity: parseInt(row['Stok'] || row['stock_quantity'] || row['Stock'] || '0'),
+            sku: row['SKU'] || row['sku'] || '',
+            barcode: row['Barkod'] || row['barcode'] || '',
+            is_active: row['Aktif'] !== false && row['is_active'] !== false,
+            is_featured: row['Öne Çıkan'] === true || row['is_featured'] === true,
+            is_digital: row['Dijital'] === true || row['is_digital'] === true,
+            category_id: categoryId,
+          };
+
+          const { data: product, error: productError } = await supabase
+            .from('products')
+            .insert(productData)
+            .select()
+            .single();
+
+          if (productError) {
+            console.error('Product insert error:', productError);
+            errorCount++;
+            continue;
+          }
+
+          // Resim varsa ekle
+          const imageUrl = row['Resim URL'] || row['image_url'] || row['Image URL'];
+          if (imageUrl && product) {
+            await supabase
+              .from('product_images')
+              .insert({
+                product_id: product.id,
+                image_url: imageUrl,
+                position: 0,
+              });
+          }
+
+          successCount++;
+        } catch (err) {
+          console.error('Row processing error:', err);
+          errorCount++;
+        }
+      }
+
+      toast({
+        title: "Toplu Yükleme Tamamlandı",
+        description: `${successCount} ürün başarıyla yüklendi. ${errorCount > 0 ? `${errorCount} ürün yüklenemedi.` : ''}`,
+      });
+
+      refetch();
+    } catch (error) {
+      console.error('Excel processing error:', error);
+      toast({
+        title: "Hata",
+        description: "Excel dosyası işlenirken bir hata oluştu.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingExcel(false);
+      e.target.value = '';
     }
   };
 
@@ -186,65 +325,114 @@ const Index = () => {
                         Hızlı Ürün Ekle
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <form onSubmit={handleQuickAdd} className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="quick-name">Ürün Adı *</Label>
-                          <Input
-                            id="quick-name"
-                            value={productName}
-                            onChange={(e) => setProductName(e.target.value)}
-                            placeholder="Ürün adı"
-                            required
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="quick-image">Resim URL *</Label>
-                          <Input
-                            id="quick-image"
-                            value={productImageUrl}
-                            onChange={(e) => setProductImageUrl(e.target.value)}
-                            placeholder="https://..."
-                            required
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="quick-price">Fiyat *</Label>
-                          <Input
-                            id="quick-price"
-                            type="number"
-                            step="0.01"
-                            value={productPrice}
-                            onChange={(e) => setProductPrice(e.target.value)}
-                            placeholder="0.00"
-                            required
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="quick-category">Kategori</Label>
-                          <Select value={productCategory} onValueChange={setProductCategory}>
-                            <SelectTrigger id="quick-category">
-                              <SelectValue placeholder="Seçiniz" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {categories.map((category) => (
-                                <SelectItem key={category.id} value={category.id}>
-                                  {category.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div className="flex items-end">
-                          <Button type="submit" disabled={isSubmitting} className="w-full">
-                            <Plus className="mr-2 h-4 w-4" />
-                            {isSubmitting ? "Ekleniyor..." : "Ekle"}
+                    <CardContent className="space-y-6">
+                      {/* Excel Toplu Yükleme */}
+                      <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
+                        <Input
+                          type="file"
+                          accept=".xlsx,.xls"
+                          onChange={handleExcelUpload}
+                          disabled={isUploadingExcel}
+                          id="excel-upload"
+                          className="hidden"
+                        />
+                        <label htmlFor="excel-upload">
+                          <Button type="button" variant="outline" disabled={isUploadingExcel} asChild>
+                            <span>
+                              <Upload className="mr-2 h-4 w-4" />
+                              {isUploadingExcel ? "Yükleniyor..." : "Excel İle Toplu Yükle"}
+                            </span>
                           </Button>
+                        </label>
+                        <p className="text-sm text-muted-foreground">
+                          Excel dosyası: Ürün Adı, Fiyat, Kategori, Stok, Resim URL
+                        </p>
+                      </div>
+
+                      {/* Tek Ürün Ekleme */}
+                      <form onSubmit={handleQuickAdd} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="quick-name">Ürün Adı *</Label>
+                              <Input
+                                id="quick-name"
+                                value={productName}
+                                onChange={(e) => setProductName(e.target.value)}
+                                placeholder="Ürün adı"
+                                required
+                              />
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label htmlFor="quick-image">Resim URL *</Label>
+                              <Input
+                                id="quick-image"
+                                value={productImageUrl}
+                                onChange={(e) => setProductImageUrl(e.target.value)}
+                                placeholder="https://..."
+                                required
+                              />
+                              {productImageUrl && (
+                                <div className="mt-2 border rounded-lg p-2 bg-background">
+                                  <img 
+                                    src={productImageUrl} 
+                                    alt="Önizleme" 
+                                    className="w-full h-32 object-contain rounded"
+                                    onError={(e) => {
+                                      e.currentTarget.src = '/placeholder.svg';
+                                      e.currentTarget.alt = 'Resim yüklenemedi';
+                                    }}
+                                  />
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="quick-price">Fiyat *</Label>
+                              <Input
+                                id="quick-price"
+                                type="number"
+                                step="0.01"
+                                value={productPrice}
+                                onChange={(e) => setProductPrice(e.target.value)}
+                                placeholder="0.00"
+                                required
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="quick-category">Kategori</Label>
+                              <Select value={productCategory} onValueChange={setProductCategory}>
+                                <SelectTrigger id="quick-category">
+                                  <SelectValue placeholder="Seçiniz" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {categories.map((category) => (
+                                    <SelectItem key={category.id} value={category.id}>
+                                      {category.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
                         </div>
+
+                        <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                          <div className="space-y-1">
+                            <Label htmlFor="is-active">Ürün Aktif</Label>
+                            <p className="text-sm text-muted-foreground">Ürünü hemen yayınla</p>
+                          </div>
+                          <Switch
+                            id="is-active"
+                            checked={isActive}
+                            onCheckedChange={setIsActive}
+                          />
+                        </div>
+
+                        <Button type="submit" disabled={isSubmitting} className="w-full" size="lg">
+                          <Plus className="mr-2 h-4 w-4" />
+                          {isSubmitting ? "Ekleniyor..." : "Ürün Ekle"}
+                        </Button>
                       </form>
                     </CardContent>
                   </Card>
