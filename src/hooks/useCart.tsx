@@ -28,6 +28,7 @@ export const useCart = create<CartStore>()(
       items: [],
       
       addItem: (item) => {
+        console.log("addItem çağrıldı:", item);
         const items = get().items;
         const existingItem = items.find((i) => i.id === item.id);
         
@@ -48,14 +49,17 @@ export const useCart = create<CartStore>()(
             ),
           });
           
+          console.log("Sepet güncellendi (miktar):", get().items);
+          
           toast({
             title: "Miktar Güncellendi",
             description: `${item.name} sepetinizde güncellendi.`,
           });
         } else {
-          set({
-            items: [...items, { ...item, quantity: item.quantity || 1 }],
-          });
+          const newItems = [...items, { ...item, quantity: item.quantity || 1 }];
+          set({ items: newItems });
+          
+          console.log("Sepete yeni ürün eklendi:", newItems);
           
           toast({
             title: "Sepete Eklendi",

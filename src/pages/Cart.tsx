@@ -6,12 +6,14 @@ import { ArrowLeft, ShoppingBag, Trash2, Plus, Minus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
 const Cart = () => {
   const navigate = useNavigate();
   const { items, removeItem, updateQuantity, getTotalPrice } = useCart();
   const { user, loading: authLoading } = useAuth();
+  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const shippingCost = items.length > 0 ? 39.99 : 0;
@@ -19,12 +21,21 @@ const Cart = () => {
   const total = subtotal + shippingCost;
 
   const handleCheckout = () => {
+    console.log("Checkout tıklandı. Sepet durumu:", { itemsCount: items.length, items });
+    
+    if (items.length === 0) {
+      toast({
+        title: "Sepet Boş",
+        description: "Sepetinize ürün ekleyerek alışverişe başlayın.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (!authLoading && !user) {
       navigate("/auth?redirect=/checkout");
       return;
     }
-    
-    if (items.length === 0) return;
     
     setIsSubmitting(true);
     navigate("/checkout");
