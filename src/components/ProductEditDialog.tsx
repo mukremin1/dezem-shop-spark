@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { ProductVariants } from "./ProductVariants";
 
 interface ProductEditDialogProps {
   productId: string;
@@ -148,10 +150,18 @@ export const ProductEditDialog = ({ productId, open, onOpenChange }: ProductEdit
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Ürün Düzenle</DialogTitle>
         </DialogHeader>
+        
+        <Tabs defaultValue="details" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="details">Ürün Detayları</TabsTrigger>
+            <TabsTrigger value="variants">Varyantlar</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="details" className="space-y-4 mt-4">
         
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-2 gap-4">
@@ -235,6 +245,12 @@ export const ProductEditDialog = ({ productId, open, onOpenChange }: ProductEdit
             {loading ? "Kaydediliyor..." : "Kaydet"}
           </Button>
         </DialogFooter>
+          </TabsContent>
+
+          <TabsContent value="variants" className="mt-4">
+            <ProductVariants productId={productId} />
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

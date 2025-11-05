@@ -45,11 +45,6 @@ const Checkout = () => {
       return;
     }
 
-    if (items.length === 0) {
-      navigate("/cart");
-      return;
-    }
-
     // Load user profile data
     if (user) {
       supabase
@@ -69,7 +64,14 @@ const Checkout = () => {
           }
         });
     }
-  }, [user, authLoading, navigate, items.length]);
+  }, [user, authLoading, navigate]);
+
+  // Sepet kontrolü ayrı useEffect'te
+  useEffect(() => {
+    if (!authLoading && items.length === 0) {
+      navigate("/cart");
+    }
+  }, [items.length, authLoading, navigate]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

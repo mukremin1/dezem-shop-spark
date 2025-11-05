@@ -167,6 +167,12 @@ const Index = () => {
     if (!file) return;
 
     setIsUploadingExcel(true);
+    
+    toast({
+      title: "Yükleniyor...",
+      description: "Excel dosyası işleniyor, lütfen bekleyin...",
+    });
+
     try {
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
@@ -176,60 +182,61 @@ const Index = () => {
       let successCount = 0;
       let errorCount = 0;
 
+      // Kategorileri önce topla
+      const categoryMap = new Map<string, string>();
+      const uniqueCategories = new Set<string>();
+      
       for (const row of jsonData as any[]) {
-        try {
-          let categoryId = null;
-          const categoryName = row['Kategori'] || row['category'] || row['Category'];
+        const categoryName = row['Kategori'] || row['category'] || row['Category'];
+        if (categoryName) uniqueCategories.add(categoryName);
+      }
+
+      // Kategorileri toplu oluştur
+      for (const categoryName of uniqueCategories) {
+        const categorySlug = categoryName
+          .toLowerCase()
+          .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
+          .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
+          .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+        const { data: existingCategory } = await supabase
+          .from('categories')
+          .select('id')
+          .eq('slug', categorySlug)
+          .maybeSingle();
+
+        if (existingCategory) {
+          categoryMap.set(categoryName, existingCategory.id);
+        } else {
+          const { data: newCategory } = await supabase
+            .from('categories')
+            .insert({ name: categoryName, slug: categorySlug })
+            .select('id')
+            .maybeSingle();
           
-          if (categoryName) {
-            const categorySlug = categoryName
-              .toLowerCase()
-              .replace(/ğ/g, 'g')
-              .replace(/ü/g, 'u')
-              .replace(/ş/g, 's')
-              .replace(/ı/g, 'i')
-              .replace(/ö/g, 'o')
-              .replace(/ç/g, 'c')
-              .replace(/[^a-z0-9]+/g, '-')
-              .replace(/(^-|-$)/g, '');
+          if (newCategory) categoryMap.set(categoryName, newCategory.id);
+        }
+      }
 
-            const { data: existingCategory } = await supabase
-              .from('categories')
-              .select('id')
-              .eq('slug', categorySlug)
-              .maybeSingle();
-
-            if (existingCategory) {
-              categoryId = existingCategory.id;
-            } else {
-              const { data: newCategory, error: categoryError } = await supabase
-                .from('categories')
-                .insert({
-                  name: categoryName,
-                  slug: categorySlug,
-                })
-                .select('id')
-                .single();
-
-              if (!categoryError && newCategory) {
-                categoryId = newCategory.id;
-              }
-            }
-          }
+      // Toplu ürün ekleme - 50'şer batch
+      const batchSize = 50;
+      for (let i = 0; i < jsonData.length; i += batchSize) {
+        const batch = jsonData.slice(i, i + batchSize) as any[];
+        const productsToInsert = [];
+        
+        for (let j = 0; j < batch.length; j++) {
+          const row = batch[j];
+          const categoryName = row['Kategori'] || row['category'] || row['Category'];
+          const categoryId = categoryName ? categoryMap.get(categoryName) : null;
 
           const productName = row['Ürün Adı'] || row['name'] || row['Name'] || '';
           const slug = productName
             .toLowerCase()
-            .replace(/ğ/g, 'g')
-            .replace(/ü/g, 'u')
-            .replace(/ş/g, 's')
-            .replace(/ı/g, 'i')
-            .replace(/ö/g, 'o')
-            .replace(/ç/g, 'c')
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/(^-|-$)/g, '');
+            .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
+            .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
+            .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now() + '-' + (i + j);
 
-          const productData = {
+          productsToInsert.push({
             name: productName,
             slug,
             price: parseFloat(row['Fiyat'] || row['price'] || row['Price'] || '0'),
@@ -243,36 +250,43 @@ const Index = () => {
             is_featured: row['Öne Çıkan'] === true || row['is_featured'] === true,
             is_digital: row['Dijital'] === true || row['is_digital'] === true,
             category_id: categoryId,
-          };
+          });
+        }
 
-          const { data: product, error: productError } = await supabase
-            .from('products')
-            .insert(productData)
-            .select()
-            .single();
+        // Batch insert
+        const { data: insertedProducts, error: batchError } = await supabase
+          .from('products')
+          .insert(productsToInsert)
+          .select();
 
-          if (productError) {
-            console.error('Product insert error:', productError);
-            errorCount++;
-            continue;
-          }
+        if (batchError) {
+          console.error('Batch error:', batchError);
+          errorCount += productsToInsert.length;
+          continue;
+        }
 
-          // Resim varsa ekle
-          const imageUrl = row['Resim URL'] || row['image_url'] || row['Image URL'];
-          if (imageUrl && product) {
-            await supabase
-              .from('product_images')
-              .insert({
+        // Resimleri ekle
+        if (insertedProducts) {
+          const imagesToInsert = [];
+          for (let j = 0; j < batch.length; j++) {
+            const row = batch[j];
+            const product = insertedProducts[j];
+            const imageUrl = row['Resim URL'] || row['image_url'] || row['Image URL'];
+            
+            if (product && imageUrl) {
+              imagesToInsert.push({
                 product_id: product.id,
                 image_url: imageUrl,
                 position: 0,
               });
+            }
           }
-
-          successCount++;
-        } catch (err) {
-          console.error('Row processing error:', err);
-          errorCount++;
+          
+          if (imagesToInsert.length > 0) {
+            await supabase.from('product_images').insert(imagesToInsert);
+          }
+          
+          successCount += insertedProducts.length;
         }
       }
 
