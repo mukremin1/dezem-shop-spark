@@ -66,13 +66,6 @@ const Checkout = () => {
     }
   }, [user, authLoading, navigate]);
 
-  // Sepet kontrolü ayrı useEffect'te
-  useEffect(() => {
-    if (!authLoading && items.length === 0) {
-      navigate("/cart");
-    }
-  }, [items.length, authLoading, navigate]);
-
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -190,6 +183,23 @@ const Checkout = () => {
 
   if (authLoading) {
     return <div>Yükleniyor...</div>;
+  }
+
+  // Sepet boşsa uyarı göster ama yönlendirme
+  if (items.length === 0) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-1 container py-8">
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-bold mb-4">Sepetiniz Boş</h2>
+            <p className="text-muted-foreground mb-6">Ödeme yapabilmek için sepetinize ürün eklemelisiniz.</p>
+            <Button onClick={() => navigate("/")}>Alışverişe Başla</Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
   }
 
   return (
