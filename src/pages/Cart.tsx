@@ -11,7 +11,7 @@ import { useState } from "react";
 
 const Cart = () => {
   const navigate = useNavigate();
-  const { items, removeItem, updateQuantity, getTotalPrice } = useCart();
+  const { items, removeItem, updateQuantity, getTotalPrice, _hasHydrated } = useCart();
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,6 +22,14 @@ const Cart = () => {
 
   const handleCheckout = () => {
     console.log("Checkout tıklandı. Sepet durumu:", { itemsCount: items.length, items });
+    
+    if (!_hasHydrated) {
+      toast({
+        title: "Yükleniyor",
+        description: "Lütfen bekleyin...",
+      });
+      return;
+    }
     
     if (items.length === 0) {
       toast({

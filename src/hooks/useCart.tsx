@@ -20,12 +20,21 @@ interface CartStore {
   clearCart: () => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
+  _hasHydrated: boolean;
+  setHasHydrated: (state: boolean) => void;
 }
 
 export const useCart = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
+      _hasHydrated: false,
+      
+      setHasHydrated: (state) => {
+        set({
+          _hasHydrated: state
+        });
+      },
       
       addItem: (item) => {
         console.log("addItem çağrıldı:", item);
@@ -113,6 +122,9 @@ export const useCart = create<CartStore>()(
     }),
     {
       name: 'cart-storage',
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );

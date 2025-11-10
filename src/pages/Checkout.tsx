@@ -26,7 +26,7 @@ const checkoutSchema = z.object({
 const Checkout = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { items, getTotalPrice, clearCart } = useCart();
+  const { items, getTotalPrice, clearCart, _hasHydrated } = useCart();
   const { toast } = useToast();
   const [paymentMethod, setPaymentMethod] = useState<"bank" | "shopier">("bank");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -181,11 +181,23 @@ const Checkout = () => {
   const shippingCost = 39.99;
   const total = subtotal + shippingCost;
 
-  if (authLoading) {
-    return <div>Yükleniyor...</div>;
+  // Zustand persist yüklenirken bekle
+  if (!_hasHydrated || authLoading) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-1 container py-8 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Yükleniyor...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
   }
 
-  // Sepet boşsa uyarı göster ama yönlendirme
+  // Sepet boşsa uyarı göster
   if (items.length === 0) {
     return (
       <div className="flex flex-col min-h-screen">
