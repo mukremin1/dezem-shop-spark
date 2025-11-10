@@ -7,13 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShoppingCart, ArrowLeft } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "@/hooks/useCart";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 const ProductDetail = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
+  const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
+  const [finalPrice, setFinalPrice] = useState(0);
+  const [finalStock, setFinalStock] = useState(0);
   const addItem = useCart((state) => state.addItem);
 
   const { data: product, isLoading } = useQuery({
@@ -24,7 +29,8 @@ const ProductDetail = () => {
         .select(`
           *,
           product_images(image_url, alt_text, position),
-          categories(name)
+          categories(name),
+          product_variants(*)
         `)
         .eq("slug", slug)
         .eq("is_active", true)
@@ -34,6 +40,23 @@ const ProductDetail = () => {
       return data;
     },
   });
+
+  const activeVariants = product?.product_variants?.filter((v: any) => v.is_active) || [];
+
+  useEffect(() => {
+    if (product) {
+      if (selectedVariant && activeVariants.length > 0) {
+        const variant = activeVariants.find((v: any) => v.id === selectedVariant);
+        if (variant) {
+          setFinalPrice(Number(product.price) + Number(variant.price_adjustment || 0));
+          setFinalStock(variant.stock_quantity);
+        }
+      } else {
+        setFinalPrice(Number(product.price));
+        setFinalStock(product.stock_quantity);
+      }
+    }
+  }, [product, selectedVariant, activeVariants]);
 
   if (isLoading) {
     return (
@@ -115,7 +138,7 @@ const ProductDetail = () => {
 
             <div className="flex items-center gap-4">
               <span className="text-4xl font-bold text-primary">
-                ₺{Number(product.price).toFixed(2)}
+                ₺{finalPrice.toFixed(2)}
               </span>
               {product.compare_price && (
                 <span className="text-2xl text-muted-foreground line-through">
@@ -128,9 +151,9 @@ const ProductDetail = () => {
               {product.is_digital && (
                 <Badge variant="secondary">Dijital Ürün</Badge>
               )}
-              {product.stock_quantity > 0 ? (
+              {finalStock > 0 ? (
                 <Badge variant="secondary" className="bg-green-500/10 text-green-700">
-                  Stokta Var
+                  Stokta Var ({finalStock} adet)
                 </Badge>
               ) : (
                 <Badge variant="destructive">Stokta Yok</Badge>
@@ -141,6 +164,34 @@ const ProductDetail = () => {
               <p className="text-lg text-muted-foreground">
                 {product.short_description}
               </p>
+            )}
+
+            {activeVariants.length > 0 && (
+              <div className="space-y-3 border rounded-lg p-4 bg-muted/50">
+                <Label htmlFor="variant-select" className="text-base font-semibold">
+                  Varyant Seçin
+                </Label>
+                <Select value={selectedVariant || ""} onValueChange={setSelectedVariant}>
+                  <SelectTrigger id="variant-select" className="w-full bg-background">
+                    <SelectValue placeholder="Bir varyant seçin" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background z-50">
+                    {activeVariants.map((variant: any) => (
+                      <SelectItem key={variant.id} value={variant.id}>
+                        {variant.name}: {variant.value}
+                        {variant.price_adjustment !== 0 && (
+                          <span className="text-muted-foreground ml-2">
+                            ({variant.price_adjustment > 0 ? '+' : ''}₺{Number(variant.price_adjustment).toFixed(2)})
+                          </span>
+                        )}
+                        <span className="text-xs text-muted-foreground ml-2">
+                          (Stok: {variant.stock_quantity})
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             )}
 
             <div className="flex items-center gap-4">
@@ -158,7 +209,7 @@ const ProductDetail = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => setQuantity(quantity + 1)}
-                  disabled={quantity >= product.stock_quantity}
+                  disabled={quantity >= finalStock}
                 >
                   +
                 </Button>
@@ -166,21 +217,25 @@ const ProductDetail = () => {
               <Button
                 className="flex-1"
                 size="lg"
-                disabled={product.stock_quantity === 0}
+                disabled={finalStock === 0 || (activeVariants.length > 0 && !selectedVariant)}
                 onClick={() => {
+                  const variantInfo = selectedVariant 
+                    ? activeVariants.find((v: any) => v.id === selectedVariant)
+                    : null;
+
                   addItem({
-                    id: product.id,
-                    name: product.name,
-                    price: product.price,
+                    id: selectedVariant || product.id,
+                    name: variantInfo ? `${product.name} - ${variantInfo.name}: ${variantInfo.value}` : product.name,
+                    price: finalPrice,
                     imageUrl: product.product_images?.[0]?.image_url,
-                    stock: product.stock_quantity,
+                    stock: finalStock,
                     slug: product.slug,
                     quantity,
                   });
                 }}
               >
                 <ShoppingCart className="mr-2 h-5 w-5" />
-                Sepete Ekle
+                {activeVariants.length > 0 && !selectedVariant ? "Varyant Seçin" : "Sepete Ekle"}
               </Button>
             </div>
 

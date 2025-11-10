@@ -15,6 +15,7 @@ interface ProductCardProps {
   imageUrl?: string;
   slug: string;
   isDigital: boolean;
+  stock?: number;
   isAdmin?: boolean;
 }
 
@@ -26,6 +27,7 @@ export const ProductCard = ({
   imageUrl,
   slug,
   isDigital,
+  stock = 100,
   isAdmin = false,
 }: ProductCardProps) => {
   const navigate = useNavigate();
@@ -40,7 +42,7 @@ export const ProductCard = ({
       name,
       price,
       imageUrl,
-      stock: 100, // We don't have stock info in the card, default to high number
+      stock,
       slug,
     });
   };

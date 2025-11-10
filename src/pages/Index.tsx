@@ -525,6 +525,7 @@ const Index = () => {
                     imageUrl={product.product_images?.[0]?.image_url}
                     slug={product.slug}
                     isDigital={product.is_digital}
+                    stock={product.stock_quantity}
                     isAdmin={isAdmin}
                   />
                 ))}
