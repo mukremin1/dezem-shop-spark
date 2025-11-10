@@ -515,20 +515,27 @@ const Index = () => {
               </div>
             ) : products && products.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {products.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    id={product.id}
-                    name={product.name}
-                    price={Number(product.price)}
-                    comparePrice={product.compare_price ? Number(product.compare_price) : undefined}
-                    imageUrl={product.product_images?.[0]?.image_url}
-                    slug={product.slug}
-                    isDigital={product.is_digital}
-                    stock={product.stock_quantity}
-                    isAdmin={isAdmin}
-                  />
-                ))}
+                {products.map((product) => {
+                  const productPrice = Number(product.price) || 0;
+                  const productComparePrice = product.compare_price ? Number(product.compare_price) : undefined;
+                  const productStock = Number(product.stock_quantity) || 0;
+                  const productImageUrl = product.product_images?.[0]?.image_url || '/placeholder.svg';
+                  
+                  return (
+                    <ProductCard
+                      key={product.id}
+                      id={product.id}
+                      name={product.name}
+                      price={productPrice}
+                      comparePrice={productComparePrice}
+                      imageUrl={productImageUrl}
+                      slug={product.slug}
+                      isDigital={product.is_digital}
+                      stock={productStock}
+                      isAdmin={isAdmin}
+                    />
+                  );
+                })}
               </div>
             ) : (
               <div className="text-center py-12">

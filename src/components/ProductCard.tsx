@@ -37,11 +37,17 @@ export const ProductCard = ({
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    // Fotoğraf URL'sini düzelt
+    const finalImageUrl = imageUrl || '/placeholder.svg';
+    
+    console.log("Sepete ekleniyor:", { id, name, price, imageUrl: finalImageUrl, stock, slug });
+    
     addItem({
       id,
       name,
       price,
-      imageUrl,
+      imageUrl: finalImageUrl,
       stock,
       slug,
     });
@@ -78,11 +84,11 @@ export const ProductCard = ({
         </h3>
         <div className="mt-2 flex items-center gap-2">
           <span className="text-xl font-bold text-primary">
-            ₺{price.toFixed(2)}
+            ₺{Number(price || 0).toFixed(2)}
           </span>
-          {comparePrice && (
+          {comparePrice && comparePrice > 0 && (
             <span className="text-sm text-muted-foreground line-through">
-              ₺{comparePrice.toFixed(2)}
+              ₺{Number(comparePrice).toFixed(2)}
             </span>
           )}
         </div>
