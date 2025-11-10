@@ -218,8 +218,8 @@ const Index = () => {
         }
       }
 
-      // Toplu ürün ekleme - 50'şer batch
-      const batchSize = 50;
+      // Toplu ürün ekleme - 100'er batch (10.000 ürün kapasitesi)
+      const batchSize = 100;
       for (let i = 0; i < jsonData.length; i += batchSize) {
         const batch = jsonData.slice(i, i + batchSize) as any[];
         const productsToInsert = [];
@@ -230,11 +230,17 @@ const Index = () => {
           const categoryId = categoryName ? categoryMap.get(categoryName) : null;
 
           const productName = row['Ürün Adı'] || row['name'] || row['Name'] || '';
+          const timestamp = Date.now();
+          const uniqueId = i + j;
           const slug = productName
             .toLowerCase()
             .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
             .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
-            .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now() + '-' + (i + j);
+            .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + timestamp + '-' + uniqueId;
+
+          // SKU kontrolü - boş ise unique değer üret
+          const skuValue = row['SKU'] || row['sku'];
+          const sku = skuValue ? `${skuValue}-${timestamp}-${uniqueId}` : `SKU-${timestamp}-${uniqueId}`;
 
           productsToInsert.push({
             name: productName,
@@ -244,8 +250,8 @@ const Index = () => {
             description: row['Açıklama'] || row['description'] || row['Description'] || '',
             short_description: row['Kısa Açıklama'] || row['short_description'] || '',
             stock_quantity: parseInt(row['Stok'] || row['stock_quantity'] || row['Stock'] || '0'),
-            sku: row['SKU'] || row['sku'] || '',
-            barcode: row['Barkod'] || row['barcode'] || '',
+            sku,
+            barcode: row['Barkod'] || row['barcode'] || `BAR-${timestamp}-${uniqueId}`,
             is_active: row['Aktif'] !== false && row['is_active'] !== false,
             is_featured: row['Öne Çıkan'] === true || row['is_featured'] === true,
             is_digital: row['Dijital'] === true || row['is_digital'] === true,
