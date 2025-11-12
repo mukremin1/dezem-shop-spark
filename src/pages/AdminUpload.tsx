@@ -443,8 +443,8 @@ const AdminUpload = () => {
             .insert({
               name,
               slug,
-              price: price * 0.55, // %45 indirim uygula
-              compare_price: price > 0 ? price : (comparePrice > 0 ? comparePrice : null),
+              price: price * 1.20 + 109, // %20 kar + 109 TL
+              compare_price: null,
               description,
               stock_quantity: stock,
               sku,
