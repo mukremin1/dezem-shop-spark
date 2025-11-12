@@ -13,6 +13,16 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const productFormSchema = z.object({
   name: z.string().min(1, "Ürün adı zorunludur"),
@@ -29,6 +39,7 @@ const productFormSchema = z.object({
 const AdminUpload = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [xmlUrl, setXmlUrl] = useState("");
+  const [showXmlConfirm, setShowXmlConfirm] = useState(false);
   const { toast } = useToast();
 
   const { data: categories = [] } = useQuery({
@@ -376,7 +387,7 @@ const AdminUpload = () => {
     }
   };
 
-  const handleXmlImport = async () => {
+  const handleXmlConfirmOpen = () => {
     if (!xmlUrl.trim()) {
       toast({
         title: "Hata",
@@ -386,20 +397,24 @@ const AdminUpload = () => {
       return;
     }
 
+    // Security: Validate URL format and require HTTPS
+    const urlPattern = /^https:\/\/[a-zA-Z0-9-.]+(\.[\w]{2,})+/;
+    if (!urlPattern.test(xmlUrl)) {
+      toast({
+        title: "Güvenlik Hatası",
+        description: "Sadece HTTPS protokolü ile başlayan URL'ler kabul edilir.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setShowXmlConfirm(true);
+  };
+
+  const handleXmlImport = async () => {
+    setShowXmlConfirm(false);
     setIsUploading(true);
     try {
-      // Security: Validate URL format and require HTTPS
-      const urlPattern = /^https:\/\/[a-zA-Z0-9-.]+(\.[\w]{2,})+/;
-      if (!urlPattern.test(xmlUrl)) {
-        toast({
-          title: "Güvenlik Hatası",
-          description: "Sadece HTTPS protokolü ile başlayan URL'ler kabul edilir.",
-          variant: "destructive",
-        });
-        setIsUploading(false);
-        return;
-      }
-
       // Security: Add timeout (10 seconds) and abort controller
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 10000);
@@ -410,34 +425,11 @@ const AdminUpload = () => {
       });
       clearTimeout(timeout);
 
-      // Security: Check file size limit (10MB)
-      const contentLength = response.headers.get('content-length');
-      if (contentLength && parseInt(contentLength) > 10485760) {
-        toast({
-          title: "Dosya Çok Büyük",
-          description: "XML dosyası 10MB'dan küçük olmalıdır.",
-          variant: "destructive",
-        });
-        setIsUploading(false);
-        return;
-      }
-
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
       const xmlText = await response.text();
-      
-      // Security: Check actual size after download
-      if (xmlText.length > 10485760) {
-        toast({
-          title: "Dosya Çok Büyük",
-          description: "XML dosyası 10MB'dan küçük olmalıdır.",
-          variant: "destructive",
-        });
-        setIsUploading(false);
-        return;
-      }
 
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(xmlText, "text/xml");
@@ -662,7 +654,7 @@ const AdminUpload = () => {
             </p>
           </div>
           <Button
-            onClick={handleXmlImport}
+            onClick={handleXmlConfirmOpen}
             disabled={isUploading || !xmlUrl.trim()}
             className="w-full"
           >
@@ -835,6 +827,30 @@ const AdminUpload = () => {
           </Form>
         </CardContent>
       </Card>
+
+      {/* XML Onay Dialog */}
+      <AlertDialog open={showXmlConfirm} onOpenChange={setShowXmlConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>XML İçe Aktarma Onayı</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>Aşağıdaki URL'den ürünler içe aktarılacak:</p>
+              <p className="font-mono text-sm bg-muted p-2 rounded break-all">
+                {xmlUrl}
+              </p>
+              <p className="text-destructive font-medium">
+                Bu işlem geri alınamaz. Devam etmek istediğinizden emin misiniz?
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>İptal</AlertDialogCancel>
+            <AlertDialogAction onClick={handleXmlImport}>
+              Onayla ve İçe Aktar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
