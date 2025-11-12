@@ -125,6 +125,18 @@ const AdminUpload = () => {
 
       console.log("Excel data:", jsonData);
 
+      // 50.000 ürün limiti kontrolü
+      if (jsonData.length > 50000) {
+        toast({
+          title: "Limit Aşıldı",
+          description: "Maksimum 50.000 ürün yükleyebilirsiniz. Lütfen daha küçük bir dosya kullanın.",
+          variant: "destructive",
+        });
+        setIsUploading(false);
+        e.target.value = '';
+        return;
+      }
+
       let successCount = 0;
       let errorCount = 0;
 
@@ -249,6 +261,17 @@ const AdminUpload = () => {
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
       console.log("Excel data:", jsonData);
+
+      // 50.000 ürün limiti kontrolü
+      if (jsonData.length > 50000) {
+        toast({
+          title: "Limit Aşıldı",
+          description: "Maksimum 50.000 ürün yükleyebilirsiniz. Lütfen daha küçük bir dosya kullanın.",
+          variant: "destructive",
+        });
+        setIsUploading(false);
+        return;
+      }
 
       let successCount = 0;
       let errorCount = 0;
@@ -558,47 +581,12 @@ const AdminUpload = () => {
 
   return (
     <div className="container mx-auto py-8 px-4 space-y-6">
-      {/* XML İçe Aktarma */}
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Link className="h-5 w-5" />
-            XML Link ile Ürün İçe Aktar
-          </CardTitle>
-          <CardDescription>
-            XML formatındaki ürün feedini linkten içe aktarın (otomatik %45 indirim uygulanır)
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Input
-              type="url"
-              placeholder="https://example.com/products.xml"
-              value={xmlUrl}
-              onChange={(e) => setXmlUrl(e.target.value)}
-              disabled={isUploading}
-            />
-            <p className="text-xs text-muted-foreground">
-              XML formatı: &lt;urun&gt;&lt;isim&gt;, &lt;kategori&gt;, &lt;fiyat&gt;, &lt;eskiFiyat&gt;, &lt;aciklama&gt;, &lt;stok&gt;, &lt;sku&gt;, &lt;resim&gt;
-            </p>
-          </div>
-          <Button
-            onClick={handleXmlImport}
-            disabled={isUploading || !xmlUrl.trim()}
-            className="w-full"
-          >
-            <Link className="mr-2 h-4 w-4" />
-            {isUploading ? "İçe Aktarılıyor..." : "XML'den İçe Aktar"}
-          </Button>
-        </CardContent>
-      </Card>
-
       {/* Excel Yükleme */}
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
           <CardTitle>Toplu Ürün Yükleme</CardTitle>
           <CardDescription>
-            Excel dosyanızı yükleyerek toplu ürün ekleyebilirsiniz
+            Excel dosyanızı yükleyerek toplu ürün ekleyebilirsiniz (maksimum 50.000 ürün)
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -646,6 +634,41 @@ const AdminUpload = () => {
               </div>
             </label>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* XML İçe Aktarma */}
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Link className="h-5 w-5" />
+            XML Link ile Ürün İçe Aktar
+          </CardTitle>
+          <CardDescription>
+            XML formatındaki ürün feedini linkten içe aktarın
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Input
+              type="url"
+              placeholder="https://example.com/products.xml"
+              value={xmlUrl}
+              onChange={(e) => setXmlUrl(e.target.value)}
+              disabled={isUploading}
+            />
+            <p className="text-xs text-muted-foreground">
+              XML formatı: &lt;urun&gt;&lt;isim&gt;, &lt;kategori&gt;, &lt;fiyat&gt;, &lt;eskiFiyat&gt;, &lt;aciklama&gt;, &lt;stok&gt;, &lt;sku&gt;, &lt;resim&gt;
+            </p>
+          </div>
+          <Button
+            onClick={handleXmlImport}
+            disabled={isUploading || !xmlUrl.trim()}
+            className="w-full"
+          >
+            <Link className="mr-2 h-4 w-4" />
+            {isUploading ? "İçe Aktarılıyor..." : "XML'den İçe Aktar"}
+          </Button>
         </CardContent>
       </Card>
 
