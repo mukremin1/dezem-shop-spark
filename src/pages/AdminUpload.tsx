@@ -654,7 +654,7 @@ const AdminUpload = () => {
             </p>
           </div>
           <Button
-            onClick={handleXmlImport}
+            onClick={handleXmlConfirmOpen}
             disabled={isUploading || !xmlUrl.trim()}
             className="w-full"
           >
