@@ -1,49 +1,30 @@
 import { useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 
-export default function SearchPage() {
-  const { search } = useLocation();
-  const query = new URLSearchParams(search).get("q") || "";
-
-  const [results, setResults] = useState<any[]>([]);
+export const SearchPage = () => {
+  const location = useLocation();
+  const [results, setResults] = useState<string[]>([]);
+  const query = new URLSearchParams(location.search).get("q") || "";
 
   useEffect(() => {
-    const fetchResults = async () => {
-      const { data } = await supabase
-        .from("products") // tablonun adı
-        .select("*")
-        .ilike("title", `%${query}%`); // title kolonunu değiştirilebilir
-
-      setResults(data || []);
-    };
-
-    fetchResults();
+    if (query) {
+      // Buraya gerçek ürün sorgulama API veya filtreleme mantığını ekleyebilirsin
+      setResults([`Arama sonucu: ${query}`, "Ürün 1", "Ürün 2"]);
+    }
   }, [query]);
 
   return (
-    <div className="container py-6">
-      <h2 className="text-2xl font-semibold mb-4">
-        Arama sonuçları: "{query}"
-      </h2>
-
-      {results.length === 0 ? (
-        <p>Ürün bulunamadı.</p>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {results.map((p: any) => (
-            <div key={p.id} className="p-4 border rounded-lg">
-              <img
-                src={p.image}
-                alt={p.title}
-                className="h-40 w-full object-cover rounded"
-              />
-              <h3 className="font-semibold mt-2">{p.title}</h3>
-              <p className="text-primary font-bold">{p.price} ₺</p>
-            </div>
+    <div className="container mx-auto p-4">
+      <h2 className="text-xl font-bold mb-4">Arama Sonuçları</h2>
+      {results.length ? (
+        <ul>
+          {results.map((item, index) => (
+            <li key={index} className="p-2 border-b">{item}</li>
           ))}
-        </div>
+        </ul>
+      ) : (
+        <p>Sonuç bulunamadı.</p>
       )}
     </div>
   );
-}
+};
