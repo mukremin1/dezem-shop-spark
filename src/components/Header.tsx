@@ -29,9 +29,7 @@ export const Header = () => {
       setUser(session?.user ?? null);
     });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
 
@@ -51,6 +49,7 @@ export const Header = () => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
     }
   };
 
@@ -67,8 +66,8 @@ export const Header = () => {
         </div>
 
         <form
-          onSubmit={handleSearch}
           className="hidden md:flex flex-1 max-w-xl mx-8 relative"
+          onSubmit={handleSearch}
         >
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -90,10 +89,7 @@ export const Header = () => {
               <DropdownMenuContent align="end">
                 {isAdmin && (
                   <DropdownMenuItem asChild>
-                    <Link
-                      to="/admin/upload"
-                      className="flex items-center cursor-pointer"
-                    >
+                    <Link to="/admin/upload" className="flex items-center cursor-pointer">
                       <Settings className="mr-2 h-4 w-4" />
                       Admin Panel
                     </Link>
