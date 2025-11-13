@@ -12,7 +12,7 @@ export const SearchPage = () => {
       if (!query) return;
 
       const { data, error } = await supabase
-        .from("products") // Tablo adını kendi veritabanına göre değiştir
+        .from("products")
         .select("*")
         .ilike("name", `%${query}%`);
 
