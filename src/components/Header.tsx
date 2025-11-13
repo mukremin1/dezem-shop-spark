@@ -48,6 +48,12 @@ export const Header = () => {
     navigate("/");
   };
 
+  const handleSearch = () => {
+    if (searchQuery.trim() !== "") {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
@@ -61,7 +67,7 @@ export const Header = () => {
         </div>
 
         <div className="hidden md:flex flex-1 max-w-xl mx-8">
-          <div className="relative w-full">
+          <div className="relative w-full flex">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Ürün ara..."
@@ -70,10 +76,16 @@ export const Header = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  navigate(`/search?q=${searchQuery}`);
+                  handleSearch();
                 }
               }}
             />
+            <Button
+              className="ml-2"
+              onClick={handleSearch}
+            >
+              Ara
+            </Button>
           </div>
         </div>
 
