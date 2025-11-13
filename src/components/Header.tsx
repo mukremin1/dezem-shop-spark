@@ -22,7 +22,6 @@ export const Header = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const cartItemsCount = useCart((state) => state.getTotalItems());
   const { isAdmin } = useAdmin();
-
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -71,21 +70,14 @@ export const Header = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Ürün ara..."
-              className="pl-10"
+              className="pl-10 flex-1"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleSearch();
-                }
+                if (e.key === "Enter") handleSearch();
               }}
             />
-            <Button
-              className="ml-2"
-              onClick={handleSearch}
-            >
-              Ara
-            </Button>
+            <Button className="ml-2" onClick={handleSearch}>Ara</Button>
           </div>
         </div>
 
