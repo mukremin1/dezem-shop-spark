@@ -8,8 +8,10 @@ export const SearchPage = () => {
 
   useEffect(() => {
     if (query) {
-      // Buraya gerçek ürün sorgulama API veya filtreleme mantığını ekleyebilirsin
+      // Örnek ürün sorgulama, burayı API ile değiştir
       setResults([`Arama sonucu: ${query}`, "Ürün 1", "Ürün 2"]);
+    } else {
+      setResults([]);
     }
   }, [query]);
 
@@ -19,7 +21,9 @@ export const SearchPage = () => {
       {results.length ? (
         <ul>
           {results.map((item, index) => (
-            <li key={index} className="p-2 border-b">{item}</li>
+            <li key={index} className="p-2 border-b">
+              {item}
+            </li>
           ))}
         </ul>
       ) : (
