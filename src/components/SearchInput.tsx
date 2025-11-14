@@ -1,22 +1,23 @@
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import React from "react";
 
 interface SearchInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
 }
 
-export const SearchInput: React.FC<SearchInputProps> = ({ value, onChange }) => {
+export const SearchInput: React.FC<SearchInputProps> = ({
+  value,
+  onChange,
+  placeholder = "Search products..."
+}) => {
   return (
-    <div className="relative w-full max-w-sm">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 opacity-60" />
-      <Input
-        type="text"
-        placeholder="Ürün ara…"
-        value={value}
-        onChange={onChange}
-        className="pl-10 h-10"
-      />
-    </div>
+    <input
+      type="text"
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
   );
 };
