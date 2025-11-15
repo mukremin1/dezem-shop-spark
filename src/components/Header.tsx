@@ -1,26 +1,28 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
 import { SearchInput } from "./SearchInput";
 
 interface HeaderProps {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
+  onSearch: (query: string) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
+export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    onSearch(e.target.value);
+  };
+
   return (
-    <header className="flex justify-between items-center p-4 bg-white shadow-md">
-      <h1 className="text-xl font-bold">Dezemu</h1>
-
-      <SearchInput value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-
-      <nav className="flex gap-4">
-        <Link to="/">Anasayfa</Link>
-        <Link to="/orders">Siparişlerim</Link> {/* Yeni sekme */}
-      </nav>
+    <header className="flex flex-col md:flex-row items-center justify-between p-4 bg-white shadow-md">
+      <div className="text-2xl font-bold">Dezemu</div>
+      <div className="flex items-center gap-4 mt-2 md:mt-0">
+        <SearchInput value={searchQuery} onChange={handleSearch} />
+        <nav className="flex gap-4">
+          <a href="#home" className="hover:text-blue-500">Ana Sayfa</a>
+          <a href="#orders" className="hover:text-blue-500">Siparişlerim</a>
+        </nav>
+      </div>
     </header>
   );
 };
-
-export default Header;
-
