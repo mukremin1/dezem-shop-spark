@@ -5,17 +5,14 @@ interface SearchInputProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const SearchInput: React.FC<SearchInputProps> = ({ value, onChange }) => {
+export const SearchInput: React.FC<SearchInputProps> = ({ value, onChange }) => {
   return (
     <input
       type="text"
       value={value}
       onChange={onChange}
-      className="border border-gray-300 rounded-md px-3 py-1 text-sm 
-                 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       placeholder="Search products..."
     />
   );
 };
-
-export default SearchInput;
