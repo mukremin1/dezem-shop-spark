@@ -1,15 +1,12 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import path from "path";
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: "/", // GitHub Pages ana domain için doğru ayar
   resolve: {
     alias: {
-      "@components": "/src/components",
-      "@utils": "/src/utils",
-      "@assets": "/src/assets"
+      "@": path.resolve(__dirname, "src") // @ işareti src/ klasörüne işaret etmeli
     }
   }
 });
