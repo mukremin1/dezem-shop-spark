@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react"
 import { useSearchParams, Link } from "react-router-dom"
 import { supabase } from "@/integrations/supabase/client"
-import { Search, AlertCircle } from "lucide-react"
+import { Search, AlertCircle, Package } from "lucide-react"
 
 interface Product {
   id: string
@@ -27,18 +27,17 @@ export const SearchPage = () => {
 
       setLoading(true)
       try {
-        // Hem name hem short_description'da arama
         const { data, error } = await supabase
           .from("products")
           .select("id, name, short_description, price, image_url")
           .or(`name.ilike.%${query}%,short_description.ilike.%${query}%`)
-          .order("name")
+          .order("name", { ascending: true })
 
         if (error) throw error
         setResults(data ?? [])
       } catch (err: any) {
         console.error("Supabase arama hatası:", err)
-        setError(err.message || "Arama sırasında bir hata oluştu.")
+        setError(err.message || "Arama sırasında hata oluştu.")
       } finally {
         setLoading(false)
       }
@@ -50,26 +49,28 @@ export const SearchPage = () => {
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       {/* Başlık */}
-      <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
-          <Search size={28} className="text-primary" />
-          Arama sonuçları: <span className="text-primary">"{query}"</span>
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {loading ? "Aranıyor..." : `${results.length} ürün bulundu`}
-        </p>
+      <div className="mb-8 flex items-center gap-3">
+        <Search className="text-primary" size={28} />
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+            Arama: <span className="text-primary">"{query}"</span>
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {loading ? "Yükleniyor..." : `${results.length} ürün bulundu`}
+          </p>
+        </div>
       </div>
 
       {/* Loading */}
       {loading && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {[...Array(4)].map((_, i) => (
+          {[...Array(8)].map((_, i) => (
             <div key={i} className="bg-card rounded-lg border animate-pulse">
               <div className="bg-muted rounded-t-lg h-48" />
-              <div className="p-4 space-y-2">
+              <div className="p-4 space-y-3">
                 <div className="h-5 bg-muted rounded w-3/4" />
                 <div className="h-4 bg-muted rounded w-full" />
-                <div className="h-6 bg-muted rounded w-1/3 mt-3" />
+                <div className="h-6 bg-muted rounded w-1/3" />
               </div>
             </div>
           ))}
@@ -78,10 +79,10 @@ export const SearchPage = () => {
 
       {/* Hata */}
       {!loading && error && (
-        <div className="bg-destructive/10 border border-destructive/50 rounded-lg p-6 text-center">
-          <AlertCircle className="mx-auto text-destructive mb-3" size={48} />
-          <p className="text-destructive font-medium">{error}</p>
-          <Link to="/" className="text-primary hover:underline text-sm mt-2 inline-block">
+        <div className="bg-destructive/10 border border-destructive/50 rounded-lg p-8 text-center">
+          <AlertCircle className="mx-auto text-destructive mb-4" size={56} />
+          <p className="text-destructive font-medium text-lg">{error}</p>
+          <Link to="/" className="text-primary hover:underline text-sm mt-3 inline-block">
             Ana sayfaya dön
           </Link>
         </div>
@@ -89,11 +90,11 @@ export const SearchPage = () => {
 
       {/* Boş Sonuç */}
       {!loading && !error && query && results.length === 0 && (
-        <div className="text-center py-16">
-          <div className="bg-muted/50 border-2 border-dashed rounded-xl w-32 h-32 mx-auto mb-6" />
-          <p className="text-lg text-muted-foreground mb-2">Sonuç bulunamadı.</p>
+        <div className="text-center py-20">
+          <Package className="mx-auto text-muted-foreground mb-6" size={80} />
+          <p className="text-xl text-muted-foreground mb-2">Sonuç bulunamadı.</p>
           <p className="text-sm text-muted-foreground">
-            "{query}" için eşleşen ürün yok.
+            "{query}" için ürün bulunamadı.
           </p>
           <Link to="/" className="text-primary hover:underline text-sm mt-4 inline-block">
             Ana sayfaya dön
@@ -108,18 +109,18 @@ export const SearchPage = () => {
             <Link
               key={item.id}
               to={`/product/${item.id}`}
-              className="group block bg-card rounded-lg border hover:border-primary/50 transition-all hover:shadow-md overflow-hidden"
+              className="group block bg-card rounded-lg border hover:border-primary/50 transition-all hover:shadow-lg overflow-hidden"
             >
               <div className="aspect-square relative overflow-hidden bg-muted">
                 {item.image_url ? (
                   <img
                     src={item.image_url}
                     alt={item.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <div className="bg-muted-foreground/10 border-2 border-dashed rounded-xl w-20 h-20" />
+                    <Package className="text-muted-foreground" size={48} />
                   </div>
                 )}
               </div>
