@@ -1,0 +1,27 @@
+import React from "react";
+
+const OrdersPage: React.FC = () => {
+  const orders = [
+    { id: 1, product: "Ürün 1", status: "Teslim Edildi" },
+    { id: 2, product: "Ürün 2", status: "Yolda" },
+  ];
+
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Siparişlerim</h1>
+      <ul className="space-y-3">
+        {orders.map((order) => (
+          <li
+            key={order.id}
+            className="border p-4 rounded-md shadow-sm flex justify-between"
+          >
+            <span>{order.product}</span>
+            <span className="text-gray-500">{order.status}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default OrdersPage;
