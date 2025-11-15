@@ -6,7 +6,7 @@ import { ShoppingCart, Search, User, Heart } from 'lucide-react'
 export const Header = () => {
   const [time, setTime] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
-  const [cartCount] = useState(0) // Context ile bağlanacak
+  const [cartCount] = useState(0)
   const navigate = useNavigate()
 
   useEffect(() => {
