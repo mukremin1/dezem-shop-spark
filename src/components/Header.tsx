@@ -1,15 +1,14 @@
 // src/components/Header.tsx
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ShoppingCart, Search } from 'lucide-react'
+import { ShoppingCart, Search, User, Heart } from 'lucide-react'
 
 export const Header = () => {
   const [time, setTime] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
-  const [cartCount] = useState(0) // İleride Context ile bağlanacak
+  const [cartCount] = useState(0) // Context ile bağlanacak
   const navigate = useNavigate()
 
-  // Current time: November 15, 2025 12:57 PM +03 (TR saati)
   useEffect(() => {
     const updateTime = () => {
       const now = new Date()
@@ -39,7 +38,7 @@ export const Header = () => {
 
   return (
     <header className="site-header">
-      {/* Top Bar - Sadece User Info */}
+      {/* Top Bar - User Info */}
       <div className="top-bar">
         <div className="user-info">
           <span className="time">Current time: {time}</span>
@@ -51,9 +50,10 @@ export const Header = () => {
         </Link>
       </div>
 
-      {/* Main Nav */}
+      {/* Main Navigation */}
       <div className="main-nav">
         <Link to="/" className="logo">DEZEMU</Link>
+
         <form onSubmit={handleSearch} className="search-form">
           <Search size={20} className="search-icon" />
           <input
@@ -64,12 +64,13 @@ export const Header = () => {
             className="search-input"
           />
         </form>
+
         <div className="nav-icons">
           <button className="icon-btn" aria-label="Hesap">
-            Kişi
+            <User size={22} />
           </button>
           <button className="icon-btn" aria-label="Favoriler">
-            Yıldız
+            <Heart size={22} />
           </button>
         </div>
       </div>
