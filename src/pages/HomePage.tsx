@@ -1,23 +1,22 @@
 import React, { useState } from "react";
-import { SearchInput } from "../components/SearchInput"; // RELATIVE PATH (GitHub için doğru)
+import SearchInput from "../components/SearchInput"; // ÇOK ÖNEMLİ: default import
 
 const HomePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearch = () => {
-    alert(`Searching for: ${searchQuery}`);
-    // Burada backend veya filtreleme ekleyebilirsin
+    console.log("Search query:", searchQuery);
+    alert("Aranan kelime: " + searchQuery);
   };
 
   return (
     <div className="p-4">
-      <h1 className="text-xl font-semibold">Home Page</h1>
+      <h1 className="text-xl font-semibold mb-4">Home Page</h1>
 
-      <div className="flex gap-2 mt-4">
+      <div className="flex gap-2">
         <SearchInput
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search products..."
         />
 
         <button
