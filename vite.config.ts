@@ -20,5 +20,6 @@ export default defineConfig({
       input: "index.html",
     },
   },
-  base: "/", // GitHub Pages için "/" veya "/dezemu/" (repo adı ile eşleşmeli)
+  // Eğer GitHub Pages ile deploy yapacaksanız repo adı ile eşleştirilmiş base kullanın:
+  base: "/dezem-shop-spark/",
 });
