@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import HomePage from "./pages/HomePage";
-import Header from "./components/Header";
-import OrdersPage from "./pages/OrdersPage";
+import HomePage from "@pages/HomePage";
+import Header from "@components/Header";
+import OrdersPage from "@pages/OrdersPage";
 
 
 type Order = {
