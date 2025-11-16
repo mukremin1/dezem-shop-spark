@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "homepage": "https://mukremin1.github.io/dezem-shop-spark",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
