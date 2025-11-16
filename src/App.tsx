@@ -56,3 +56,5 @@ const App: React.FC = () => {
 };
 
 export default App;
+// Ek: named export de ekliyoruz ki import çözümlenememe durumunda alternatif olsun
+export { App };
