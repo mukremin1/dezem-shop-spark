@@ -27,7 +27,8 @@ const writeOrders = (orders: Order[]) => {
   localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
 };
 
-const App: React.FC = () => {
+// export named and default to avoid esbuild dependency-scan issues
+export const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   // onPlaceOrder: HomePage'den çağrılır
@@ -56,5 +57,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-// Ek: named export de ekliyoruz ki import çözümlenememe durumunda alternatif olsun
-export { App };
