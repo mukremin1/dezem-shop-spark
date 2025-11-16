@@ -9,15 +9,15 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
   return (
-    <header className="flex flex-col md:flex-row items-center justify-between p-4 bg-white shadow">
+    <header className="flex flex-col md:flex-row items-center justify-between p-4 bg-white shadow w-full">
       <div className="text-2xl font-bold">Dezemu</div>
 
-      <div className="flex items-center gap-4 mt-3 md:mt-0">
+      <div className="flex flex-col md:flex-row items-center gap-4 mt-3 md:mt-0 w-full md:w-auto">
         <SearchInput
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Ürün ara..."
-          className="w-64"
+          className="w-full md:w-64"
         />
 
         <nav className="flex gap-4">
