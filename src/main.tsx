@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-// import the named export to avoid default-export detection issues
+// App is exported as a named export in src/App.tsx
 import { App } from "./App.tsx";
 import "./index.css";
 
