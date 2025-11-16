@@ -4,7 +4,6 @@ import HomePage from "@pages/HomePage";
 import Header from "@components/Header";
 import OrdersPage from "@pages/OrdersPage";
 
-
 type Order = {
   id: string;
   product: string;
@@ -42,9 +41,7 @@ const App: React.FC = () => {
     };
     const next = [newOrder, ...orders];
     writeOrders(next);
-    // (opsiyonel) bildirim
     console.log("Order placed:", newOrder);
-    // Eğer user OrdersPage'teyse, sayfa yeniden okunur çünkü OrdersPage localStorage'den okuyor
   };
 
   return (
