@@ -3,11 +3,11 @@ import { Link } from "react-router-dom";
 import { Mail, MessageCircle } from "lucide-react";
 import { generateAvatarDataUrl } from "@/lib/generateAvatar";
 
-// Environment variables with fallbacks
-const SELLER_NAME = import.meta.env.DEFAULT_SELLER_NAME || "Dezemu";
-const SELLER_LOGO_URL = import.meta.env.DEFAULT_SELLER_LOGO_URL || "https://ui-avatars.com/api/?name=Dezemu&background=ff6a00&color=fff";
-const SUPPORT_EMAIL = import.meta.env.NEXT_PUBLIC_SUPPORT_EMAIL || "destek@dezemu.com";
-const SUPPORT_WHATSAPP = import.meta.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || "+905395263293";
+// Environment variables with fallbacks (using Vite's import.meta.env)
+const SELLER_NAME = import.meta.env.VITE_SELLER_NAME || "Dezemu";
+const SELLER_LOGO_URL = import.meta.env.VITE_SELLER_LOGO_URL || "https://ui-avatars.com/api/?name=Dezemu&background=ff6a00&color=fff";
+const SUPPORT_EMAIL = import.meta.env.VITE_SUPPORT_EMAIL || "destek@dezemu.com";
+const SUPPORT_WHATSAPP = import.meta.env.VITE_SUPPORT_WHATSAPP || "+905395263293";
 
 export const Header: React.FC = () => {
   // Fallback to generated avatar if logo URL fails

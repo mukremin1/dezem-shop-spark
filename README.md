@@ -67,17 +67,17 @@ VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
 VITE_SUPABASE_PROJECT_ID=your-project-id
 
 # Single Vendor Configuration
-NEXT_PUBLIC_SUPABASE_SINGLE_SELLER_ID=dezemu
+VITE_SUPABASE_SINGLE_SELLER_ID=dezemu
 SUPABASE_SINGLE_SELLER_ID=dezemu
-DEFAULT_SELLER_NAME=Dezemu
-DEFAULT_SELLER_LOGO_URL=https://ui-avatars.com/api/?name=Dezemu&background=ff6a00&color=fff
+VITE_SELLER_NAME=Dezemu
+VITE_SELLER_LOGO_URL=https://ui-avatars.com/api/?name=Dezemu&background=ff6a00&color=fff
 
 # Theme
-NEXT_PUBLIC_PRIMARY_COLOR=#ff6a00
+VITE_PRIMARY_COLOR=#ff6a00
 
 # Contact
-NEXT_PUBLIC_SUPPORT_EMAIL=destek@dezemu.com
-NEXT_PUBLIC_SUPPORT_WHATSAPP=+905395263293
+VITE_SUPPORT_EMAIL=destek@dezemu.com
+VITE_SUPPORT_WHATSAPP=+905395263293
 ```
 
 ### Deployment
@@ -133,7 +133,7 @@ The primary brand color is set to `#ff6a00` (orange). To customize:
 
 1. Update `tailwind.config.ts`
 2. Update `src/index.css` (CSS variables)
-3. Update environment variable `NEXT_PUBLIC_PRIMARY_COLOR`
+3. Update environment variable `VITE_PRIMARY_COLOR`
 
 ## 🧪 Testing
 

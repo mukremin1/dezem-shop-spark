@@ -50,11 +50,11 @@ BEGIN
         AND column_name = 'seller_id'
     ) THEN
         ALTER TABLE public.products 
-        ADD COLUMN seller_id TEXT DEFAULT 'dezemu';
+        ADD COLUMN seller_id TEXT DEFAULT COALESCE(current_setting('app.single_seller_id', true)::text, 'dezemu');
         
         -- Add comment recommending app-level enforcement
         COMMENT ON COLUMN public.products.seller_id IS 
-            'Seller ID for this product. Default: dezemu. NOT NULL constraint not added to allow gradual migration. Enforce at application level.';
+            'Seller ID for this product. Default: app.single_seller_id or dezemu. NOT NULL constraint not added to allow gradual migration. Enforce at application level.';
     END IF;
 END $$;
 
