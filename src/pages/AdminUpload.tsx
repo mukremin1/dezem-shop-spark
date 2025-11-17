@@ -97,6 +97,7 @@ const AdminUpload = () => {
         is_active: true,
         is_featured: false,
         is_digital: false,
+        seller_id: import.meta.env.VITE_NEXT_PUBLIC_SUPABASE_SINGLE_SELLER_ID || 'dezemu',
       };
 
       const { error } = await supabase
@@ -222,6 +223,7 @@ const AdminUpload = () => {
             dimensions: row['Boyutlar'] || row['dimensions'] || null,
             tags: row['Etiketler'] || row['tags'] ? String(row['Etiketler'] || row['tags']).split(',').map((t: string) => t.trim()) : null,
             category_id: categoryId,
+            seller_id: import.meta.env.VITE_NEXT_PUBLIC_SUPABASE_SINGLE_SELLER_ID || 'dezemu',
           };
 
           const { error } = await supabase
@@ -353,6 +355,7 @@ const AdminUpload = () => {
             is_featured: false,
             is_digital: false,
             category_id: categoryId,
+            seller_id: import.meta.env.VITE_NEXT_PUBLIC_SUPABASE_SINGLE_SELLER_ID || 'dezemu',
           };
 
           const { error } = await supabase
@@ -522,6 +525,7 @@ const AdminUpload = () => {
               is_active: true,
               is_featured: false,
               is_digital: false,
+              seller_id: import.meta.env.VITE_NEXT_PUBLIC_SUPABASE_SINGLE_SELLER_ID || 'dezemu',
             })
             .select('id')
             .single();
