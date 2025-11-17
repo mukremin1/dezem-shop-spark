@@ -40,4 +40,5 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
   );
 };
 
+export { Header };
 export default Header;
