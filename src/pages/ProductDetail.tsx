@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import { useCart } from "@/hooks/useCart";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { ProductGallery } from "@/components/ProductGallery";
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -111,20 +112,12 @@ const ProductDetail = () => {
         </Button>
 
         <div className="grid md:grid-cols-2 gap-8">
-          <div className="space-y-4">
-            <div className="aspect-square relative overflow-hidden rounded-lg border">
-              <img
-                src={product.product_images?.[0]?.image_url || "/placeholder.svg"}
-                alt={product.name}
-                className="object-cover w-full h-full"
-              />
-              {discount > 0 && (
-                <Badge className="absolute top-4 right-4 bg-destructive text-destructive-foreground text-lg px-3 py-1">
-                  -{discount}%
-                </Badge>
-              )}
-            </div>
-          </div>
+          <ProductGallery
+            images={product.product_images || []}
+            productName={product.name}
+            discount={discount}
+            isDigital={product.is_digital}
+          />
 
           <div className="space-y-6">
             <div>
