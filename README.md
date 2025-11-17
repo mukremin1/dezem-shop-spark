@@ -1,73 +1,111 @@
-# Welcome to your Lovable project
+# Dezemu - Single Vendor E-Commerce Platform
 
-## Project info
+Dezemu is a modern, single-vendor e-commerce platform built with React, TypeScript, and Supabase.
 
-**URL**: https://lovable.dev/projects/a9f847fd-78b9-4990-a3ff-7088fbbcc560
+## 🎨 Features
 
-## How can I edit this code?
+- **Single Vendor Store**: Dezemu-branded store with Trendyol-inspired theme (#ff6a00)
+- **Product Management**: Admin panel for easy product uploads via Excel, XML, or manual entry
+- **Responsive Design**: Mobile-first design with Tailwind CSS
+- **Supabase Backend**: Secure authentication and database management
+- **Fast Performance**: Built with Vite for optimal build speeds
 
-There are several ways of editing your application.
+## 🚀 Getting Started
 
-**Use Lovable**
+### Prerequisites
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/a9f847fd-78b9-4990-a3ff-7088fbbcc560) and start prompting.
+- Node.js 16+ and npm installed
+- Supabase account and project
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+### Installation
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Clone the repository
+git clone https://github.com/mukremin1/dezem-shop-spark.git
+cd dezem-shop-spark
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Install dependencies
+npm install
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Copy environment variables
+cp .env.example .env
+# Edit .env with your Supabase credentials
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## 📦 Database Setup
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. Go to your [Supabase Dashboard](https://supabase.com/dashboard)
+2. Navigate to SQL Editor
+3. Run the migration file: `supabase/migrations/0001_single_vendor.sql`
+4. Verify the Dezemu seller was created: `SELECT * FROM sellers WHERE id = 'dezemu';`
 
-**Use GitHub Codespaces**
+See [supabase/README.md](./supabase/README.md) for detailed migration instructions.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🌐 Deployment
 
-## What technologies are used for this project?
+### Ready to Publish Checklist
 
-This project is built with:
+Before deploying to https://dezemu.com:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- [ ] Run migration `0001_single_vendor.sql` in production Supabase
+- [ ] Set production environment variables (see `.env.example`)
+- [ ] Configure DNS: Point `dezemu.com` to your hosting provider
+- [ ] Update Supabase project URL restrictions
+- [ ] Enable SSL/HTTPS on hosting provider
+- [ ] Test product creation and seller_id assignment
+- [ ] Verify WhatsApp and email links work correctly
 
-## How can I deploy this project?
+### Environment Variables
 
-Simply open [Lovable](https://lovable.dev/projects/a9f847fd-78b9-4990-a3ff-7088fbbcc560) and click on Share -> Publish.
+Required environment variables for production:
 
-## Can I connect a custom domain to my Lovable project?
+```
+VITE_SUPABASE_PROJECT_ID=your-project-id
+VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_SINGLE_SELLER_ID=dezemu
+VITE_DEFAULT_SELLER_LOGO_URL=https://ui-avatars.com/api/?name=Dezemu&background=ff6a00&color=fff
+```
 
-Yes, you can!
+### Build for Production
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+```sh
+npm run build
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+The `dist` folder will contain production-ready files.
+
+### Deploy to GitHub Pages
+
+```sh
+npm run deploy
+```
+
+## 📞 Contact & Support
+
+- **Email**: destek@dezemu.com
+- **WhatsApp**: +90 539 526 32 93
+- **Website**: https://dezemu.com
+
+## 🛠️ Technologies Used
+
+- **Frontend**: React 18, TypeScript, Vite
+- **Styling**: Tailwind CSS, shadcn-ui components
+- **Backend**: Supabase (PostgreSQL, Authentication, Storage)
+- **State Management**: TanStack Query (React Query)
+- **Form Handling**: React Hook Form, Zod validation
+
+## 📄 License
+
+This project is proprietary software for Dezemu.
+
+## 🤝 Contributing
+
+This is a private repository. For feature requests or bug reports, please contact the development team.
+
+---
+
+Made with ❤️ for Dezemu
