@@ -16,8 +16,10 @@ const config: Config = {
         cardForeground: "hsl(20, 14.3%, 4.1%)",
         popover: "hsl(0, 0%, 100%)",
         popoverForeground: "hsl(20, 14.3%, 4.1%)",
-        primary: "hsl(25, 95%, 53%)",
-        primaryForeground: "hsl(0, 0%, 100%)",
+        primary: {
+          DEFAULT: "#ff6a00",
+          foreground: "#ffffff",
+        },
         secondary: "hsl(33, 100%, 96%)",
         secondaryForeground: "hsl(25, 90%, 20%)",
         muted: "hsl(60, 4.8%, 95.9%)",
@@ -28,7 +30,7 @@ const config: Config = {
         destructiveForeground: "hsl(60, 9.1%, 97.8%)",
         border: "hsl(20, 5.9%, 90%)",
         input: "hsl(20, 5.9%, 90%)",
-        ring: "hsl(25, 95%, 53%)",
+        ring: "#ff6a00",
       },
       borderRadius: {
         DEFAULT: "0.5rem",
