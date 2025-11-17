@@ -41,6 +41,9 @@ const AdminUpload = () => {
   const [xmlUrl, setXmlUrl] = useState("");
   const [showXmlConfirm, setShowXmlConfirm] = useState(false);
   const { toast } = useToast();
+  
+  // Get single seller ID from environment or use default
+  const SINGLE_SELLER_ID = import.meta.env.VITE_SUPABASE_SINGLE_SELLER_ID || 'dezemu';
 
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
@@ -94,6 +97,7 @@ const AdminUpload = () => {
         sku: values.sku || null,
         barcode: values.barcode || null,
         category_id: values.category_id || null,
+        seller_id: SINGLE_SELLER_ID,
         is_active: true,
         is_featured: false,
         is_digital: false,
@@ -215,6 +219,7 @@ const AdminUpload = () => {
             stock_quantity: parseInt(row['Stok'] || row['stock_quantity'] || row['Stock'] || '0'),
             sku: row['SKU'] || row['sku'] || '',
             barcode: row['Barkod'] || row['barcode'] || '',
+            seller_id: SINGLE_SELLER_ID,
             is_active: row['Aktif'] !== false && row['is_active'] !== false,
             is_featured: row['Öne Çıkan'] === true || row['is_featured'] === true,
             is_digital: row['Dijital'] === true || row['is_digital'] === true,
@@ -349,6 +354,7 @@ const AdminUpload = () => {
             stock_quantity: parseInt(row['Ürün Stok Adedi'] || '0'),
             sku: row['Model Kodu'] || row['Tedarikçi Stok Kodu'] || '',
             barcode: row['Barkod'] || '',
+            seller_id: SINGLE_SELLER_ID,
             is_active: true,
             is_featured: false,
             is_digital: false,
@@ -518,6 +524,7 @@ const AdminUpload = () => {
               description,
               stock_quantity: stock,
               sku,
+              seller_id: SINGLE_SELLER_ID,
               category_id: categoryId,
               is_active: true,
               is_featured: false,
