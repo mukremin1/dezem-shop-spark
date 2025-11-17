@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { MessageCircle, Mail, Phone } from "lucide-react";
 
 export const Footer = () => {
   return (
@@ -38,11 +39,37 @@ export const Footer = () => {
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-4">Yasal</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="hover:text-foreground cursor-pointer">Gizlilik Politikası</li>
-              <li className="hover:text-foreground cursor-pointer">Kullanım Koşulları</li>
-              <li className="hover:text-foreground cursor-pointer">KVKK</li>
+            <h4 className="font-semibold mb-4">İletişim</h4>
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              <li>
+                <a 
+                  href="https://wa.me/905395263293?text=Merhaba%20Dezemu" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 hover:text-primary transition-colors"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>WhatsApp: +90 539 526 32 93</span>
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="mailto:destek@dezemu.com" 
+                  className="flex items-center gap-2 hover:text-primary transition-colors"
+                >
+                  <Mail className="w-4 h-4" />
+                  <span>destek@dezemu.com</span>
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="tel:+905395263293" 
+                  className="flex items-center gap-2 hover:text-primary transition-colors"
+                >
+                  <Phone className="w-4 h-4" />
+                  <span>+90 539 526 32 93</span>
+                </a>
+              </li>
             </ul>
           </div>
         </div>
