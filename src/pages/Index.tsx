@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { Upload } from "lucide-react";
 import * as XLSX from "xlsx";
+import { singleVendorConfig } from "@/lib/singleVendor";
 
 const Index = () => {
   const [searchParams] = useSearchParams();
@@ -117,6 +118,7 @@ const Index = () => {
           category_id: productCategory || null,
           stock_quantity: parseInt(productStock),
           is_active: isActive,
+          seller_id: singleVendorConfig.sellerId,
         })
         .select()
         .single();
@@ -256,6 +258,7 @@ const Index = () => {
             is_featured: row['Öne Çıkan'] === true || row['is_featured'] === true,
             is_digital: row['Dijital'] === true || row['is_digital'] === true,
             category_id: categoryId,
+            seller_id: singleVendorConfig.sellerId,
           });
         }
 
