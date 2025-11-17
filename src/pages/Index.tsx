@@ -117,6 +117,7 @@ const Index = () => {
           category_id: productCategory || null,
           stock_quantity: parseInt(productStock),
           is_active: isActive,
+          seller_id: import.meta.env.VITE_SUPABASE_SINGLE_SELLER_ID || 'dezemu',
         })
         .select()
         .single();
@@ -256,6 +257,7 @@ const Index = () => {
             is_featured: row['Öne Çıkan'] === true || row['is_featured'] === true,
             is_digital: row['Dijital'] === true || row['is_digital'] === true,
             category_id: categoryId,
+            seller_id: import.meta.env.VITE_SUPABASE_SINGLE_SELLER_ID || 'dezemu',
           });
         }
 
