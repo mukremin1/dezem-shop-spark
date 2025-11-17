@@ -237,10 +237,6 @@ For detailed information about the single-vendor setup and database schema, see 
 - See [supabase/README.md](./supabase/README.md) for detailed instructions
 - Some migrations may fail if run multiple times (expected if already applied)
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/a9f847fd-78b9-4990-a3ff-7088fbbcc560) and click on Share -> Publish.
-
 ## Can I connect a custom domain to my Lovable project?
 
 Yes, you can!

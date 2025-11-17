@@ -66,6 +66,27 @@ supabase link --project-ref your-project-ref
 supabase db push
 ```
 
+### Customizing Your Store Information
+
+After running the migration, you can customize the default seller information:
+
+1. Open `supabase/migrations/update_seller_info.sql`
+2. Modify the values (store name, logo, contact info, etc.)
+3. Run this update script in your Supabase SQL Editor
+
+Or directly in SQL Editor:
+
+```sql
+UPDATE public.sellers
+SET 
+  name = 'Your Store Name',
+  description = 'Your amazing store description',
+  logo_url = 'https://your-domain.com/logo.png',
+  email = 'contact@yourstore.com',
+  phone = '+90 XXX XXX XX XX'
+WHERE id = '00000000-0000-0000-0000-000000000001';
+```
+
 ### Verifying Migration
 
 After running the migration, verify:
