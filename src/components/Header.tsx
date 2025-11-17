@@ -10,7 +10,7 @@ const SUPPORT_EMAIL = import.meta.env.VITE_SUPPORT_EMAIL || "destek@dezemu.com";
 const SUPPORT_WHATSAPP = import.meta.env.VITE_SUPPORT_WHATSAPP || "+905395263293";
 
 export const Header: React.FC = () => {
-  // Fallback to generated avatar if logo URL fails
+  // Use logo URL if provided, otherwise generate avatar
   const logoSrc = SELLER_LOGO_URL || generateAvatarDataUrl(SELLER_NAME);
 
   return (
@@ -21,10 +21,6 @@ export const Header: React.FC = () => {
           src={logoSrc} 
           alt={SELLER_NAME}
           className="w-10 h-10 rounded-full object-cover"
-          onError={(e) => {
-            // Fallback to generated avatar if image fails to load
-            e.currentTarget.src = generateAvatarDataUrl(SELLER_NAME);
-          }}
         />
         <div className="flex flex-col">
           <span className="text-2xl font-bold text-primary">{SELLER_NAME}</span>
@@ -37,7 +33,7 @@ export const Header: React.FC = () => {
         {/* Contact Block */}
         <div className="flex items-center gap-3 text-sm">
           <a
-            href={`https://wa.me/${SUPPORT_WHATSAPP.replace(/[^0-9]/g, '')}?text=Merhaba%20${SELLER_NAME}`}
+            href={`https://wa.me/${SUPPORT_WHATSAPP.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Merhaba ${SELLER_NAME}`)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
