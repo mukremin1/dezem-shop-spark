@@ -28,6 +28,7 @@ BEGIN
   END;
   
   -- Default logo: Simple SVG placeholder with Dezemu branding
+  -- SVG content: 200x200 blue (#4255ff) square with white "D" text centered
   v_logo_url := 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzQyNTVmZiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iNDgiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5EPC90ZXh0Pjwvc3ZnPg==';
   
   -- Upsert the seller record
@@ -172,9 +173,9 @@ END $$;
 -- Step 7: Enable RLS on sellers table if not already enabled
 DO $$
 BEGIN
+  -- ALTER TABLE ... ENABLE ROW LEVEL SECURITY is idempotent in PostgreSQL
+  -- It doesn't raise an error if RLS is already enabled
   ALTER TABLE public.sellers ENABLE ROW LEVEL SECURITY;
-EXCEPTION 
-  WHEN duplicate_object THEN NULL; -- RLS already enabled
 END $$;
 
 -- Step 8: Create RLS policies for sellers table
