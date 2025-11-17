@@ -13,6 +13,8 @@
     --card-foreground: 20 14.3% 4.1%;
     --popover: 0 0% 100%;
     --popover-foreground: 20 14.3% 4.1%;
+    /* Dezemu primary brand color: #ff6a00 */
+    --color-primary: #ff6a00;
     --primary: 25 95% 53%;
     --primary-foreground: 0 0% 100%;
     --secondary: 33 100% 96%;
