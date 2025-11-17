@@ -13,26 +13,12 @@ export function generateAvatarDataUrl(
   // Get first letter and capitalize
   const initial = name.charAt(0).toUpperCase();
   
-  // Create SVG
-  const svg = `
-    <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
-      <rect width="100" height="100" fill="${backgroundColor}"/>
-      <text
-        x="50%"
-        y="50%"
-        font-family="Arial, sans-serif"
-        font-size="48"
-        font-weight="bold"
-        fill="${textColor}"
-        text-anchor="middle"
-        dominant-baseline="central"
-      >${initial}</text>
-    </svg>
-  `.trim();
+  // Create SVG with proper XML encoding
+  const svg = `<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="${backgroundColor}"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="${textColor}" text-anchor="middle" dominant-baseline="central">${initial}</text></svg>`;
   
-  // Encode to data URL
-  const base64 = btoa(svg);
-  return `data:image/svg+xml;base64,${base64}`;
+  // Encode to data URL using URL encoding to avoid btoa() issues with special chars
+  const encoded = encodeURIComponent(svg);
+  return `data:image/svg+xml,${encoded}`;
 }
 
 export default generateAvatarDataUrl;
