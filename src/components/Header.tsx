@@ -1,33 +1,116 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import SearchInput from "./SearchInput";
+import { Link, useNavigate } from "react-router-dom";
+import { ShoppingCart, User, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useCart } from "@/hooks/useCart";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-interface HeaderProps {
-  searchQuery: string;
-  setSearchQuery: (q: string) => void;
-}
+export const Header = () => {
+  const navigate = useNavigate();
+  const items = useCart((state) => state.items);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [user, setUser] = useState<any>(null);
 
-const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
+  // Check user session
+  useState(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  });
+
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
+
   return (
-    <header className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between p-4 bg-white shadow">
-      <div className="text-2xl font-bold">Dezemu</div>
+    <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center gap-4">
+        <Link to="/" className="font-bold text-xl">
+          DEZEMU
+        </Link>
 
-      {/* Mobilde tam genişlik, desktop'ta normal */}
-      <div className="flex flex-col w-full md:flex-row md:items-center md:w-auto gap-3">
-        <SearchInput
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Ürün ara..."
-          className="w-full md:w-64"
-        />
+        <form onSubmit={handleSearch} className="flex-1 max-w-md">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Ürün ara..."
+              className="pl-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </form>
 
-        <nav className="flex gap-4 text-sm md:text-base">
-          <Link to="/" className="hover:text-blue-600">Anasayfa</Link>
-          <Link to="/orders" className="hover:text-blue-600">Siparişlerim</Link>
+        <nav className="flex items-center gap-2">
+          <Link to="/cart">
+            <Button variant="ghost" size="icon" className="relative">
+              <ShoppingCart className="h-5 w-5" />
+              {totalItems > 0 && (
+                <Badge
+                  variant="destructive"
+                  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                >
+                  {totalItems}
+                </Badge>
+              )}
+            </Button>
+          </Link>
+
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <User className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => navigate("/orders")}>
+                  Siparişlerim
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/admin/upload")}>
+                  Admin Panel
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleSignOut}>
+                  Çıkış Yap
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link to="/auth">
+              <Button variant="ghost" size="icon">
+                <User className="h-5 w-5" />
+              </Button>
+            </Link>
+          )}
         </nav>
       </div>
     </header>
   );
 };
-
-export default Header;
