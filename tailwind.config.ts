@@ -2,6 +2,9 @@ import type { Config } from "tailwindcss";
 import typography from "@tailwindcss/typography";
 import animate from "tailwindcss-animate";
 
+// Dezemu brand color
+const PRIMARY_COLOR = "#ff6a00";
+
 const config: Config = {
   content: [
     "./index.html",
@@ -16,8 +19,21 @@ const config: Config = {
         cardForeground: "hsl(20, 14.3%, 4.1%)",
         popover: "hsl(0, 0%, 100%)",
         popoverForeground: "hsl(20, 14.3%, 4.1%)",
-        primary: "hsl(25, 95%, 53%)",
-        primaryForeground: "hsl(0, 0%, 100%)",
+        // Dezemu primary brand color
+        primary: {
+          DEFAULT: PRIMARY_COLOR,
+          50: "#fff7ed",
+          100: "#ffedd5",
+          200: "#fed7aa",
+          300: "#fdba74",
+          400: "#fb923c",
+          500: PRIMARY_COLOR,
+          600: "#ea580c",
+          700: "#c2410c",
+          800: "#9a3412",
+          900: "#7c2d12",
+        },
+        primaryForeground: "#ffffff",
         secondary: "hsl(33, 100%, 96%)",
         secondaryForeground: "hsl(25, 90%, 20%)",
         muted: "hsl(60, 4.8%, 95.9%)",
@@ -28,7 +44,7 @@ const config: Config = {
         destructiveForeground: "hsl(60, 9.1%, 97.8%)",
         border: "hsl(20, 5.9%, 90%)",
         input: "hsl(20, 5.9%, 90%)",
-        ring: "hsl(25, 95%, 53%)",
+        ring: PRIMARY_COLOR,
       },
       borderRadius: {
         DEFAULT: "0.5rem",
