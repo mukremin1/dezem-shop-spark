@@ -1,73 +1,204 @@
-# Welcome to your Lovable project
+# Dezemu - Single-Vendor E-Commerce Platform
 
-## Project info
+Dezemu is a modern, single-vendor e-commerce platform built with React, TypeScript, and Supabase.
 
-**URL**: https://lovable.dev/projects/a9f847fd-78b9-4990-a3ff-7088fbbcc560
+## 🚀 Quick Start
 
-## How can I edit this code?
+### Prerequisites
+- Node.js 18+ and npm
+- Supabase account
 
-There are several ways of editing your application.
+### Installation
 
-**Use Lovable**
+```bash
+# Clone the repository
+git clone https://github.com/mukremin1/dezem-shop-spark.git
+cd dezem-shop-spark
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/a9f847fd-78b9-4990-a3ff-7088fbbcc560) and start prompting.
+# Install dependencies
+npm install
 
-Changes made via Lovable will be committed automatically to this repo.
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your Supabase credentials
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## 🗄️ Database Setup
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Running the Migration
 
-**Use GitHub Codespaces**
+The single-vendor migration must be run before deploying the application:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+1. **Access Supabase Dashboard**
+   - Navigate to [Supabase Dashboard](https://app.supabase.com)
+   - Select your project
+   - Go to SQL Editor
 
-## What technologies are used for this project?
+2. **Run Migration**
+   - Open `supabase/migrations/0001_single_vendor.sql`
+   - Copy the entire contents
+   - Paste into SQL Editor and execute
 
-This project is built with:
+3. **Verify Migration**
+   ```sql
+   -- Check sellers table
+   SELECT * FROM public.sellers;
+   
+   -- Verify seller_id column on products
+   SELECT column_name FROM information_schema.columns 
+   WHERE table_name = 'products' AND column_name = 'seller_id';
+   ```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+For detailed migration instructions, see [supabase/README.md](supabase/README.md).
 
-## How can I deploy this project?
+## 🔧 Configuration
 
-Simply open [Lovable](https://lovable.dev/projects/a9f847fd-78b9-4990-a3ff-7088fbbcc560) and click on Share -> Publish.
+### Environment Variables
 
-## Can I connect a custom domain to my Lovable project?
+Required environment variables (see `.env.example`):
 
-Yes, you can!
+```bash
+# Supabase
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
+VITE_SUPABASE_PROJECT_ID=your-project-id
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+# Single Vendor Configuration
+NEXT_PUBLIC_SUPABASE_SINGLE_SELLER_ID=dezemu
+SUPABASE_SINGLE_SELLER_ID=dezemu
+DEFAULT_SELLER_NAME=Dezemu
+DEFAULT_SELLER_LOGO_URL=https://ui-avatars.com/api/?name=Dezemu&background=ff6a00&color=fff
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+# Theme
+NEXT_PUBLIC_PRIMARY_COLOR=#ff6a00
+
+# Contact
+NEXT_PUBLIC_SUPPORT_EMAIL=destek@dezemu.com
+NEXT_PUBLIC_SUPPORT_WHATSAPP=+905395263293
+```
+
+### Deployment
+
+#### Vercel Deployment
+
+1. **Connect Repository**
+   - Go to [Vercel Dashboard](https://vercel.com)
+   - Import your GitHub repository
+
+2. **Set Environment Variables**
+   - Add all variables from `.env.example`
+   - **Important**: Add production Supabase credentials
+
+3. **Deploy**
+   - Vercel will automatically deploy on push to main
+
+#### DNS Configuration
+
+1. **Add Custom Domain**
+   - In Vercel dashboard, go to Project Settings → Domains
+   - Add `dezemu.com`
+
+2. **Update DNS Records**
+   - Add CNAME record: `dezemu.com` → `cname.vercel-dns.com`
+   - Or use A record pointing to Vercel's IP
+
+3. **Verify**
+   - Wait for DNS propagation (up to 48 hours)
+   - Visit https://dezemu.com
+
+## 📦 Project Structure
+
+```
+dezem-shop-spark/
+├── src/
+│   ├── components/       # React components
+│   ├── pages/           # Page components
+│   ├── lib/             # Utility functions
+│   ├── hooks/           # Custom React hooks
+│   └── integrations/    # Supabase integration
+├── supabase/
+│   ├── migrations/      # Database migrations
+│   └── README.md        # Migration documentation
+├── public/              # Static assets
+└── .github/
+    └── workflows/       # CI/CD workflows
+```
+
+## 🎨 Theme Customization
+
+The primary brand color is set to `#ff6a00` (orange). To customize:
+
+1. Update `tailwind.config.ts`
+2. Update `src/index.css` (CSS variables)
+3. Update environment variable `NEXT_PUBLIC_PRIMARY_COLOR`
+
+## 🧪 Testing
+
+```bash
+# Run linter
+npm run lint
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+## 📋 Deployment Checklist
+
+Before deploying to production:
+
+- [ ] Run database migration in Supabase
+- [ ] Set all environment variables in Vercel
+- [ ] Configure custom domain (dezemu.com)
+- [ ] Update DNS records
+- [ ] Test payment integration (if applicable)
+- [ ] Verify email notifications work
+- [ ] Test WhatsApp contact link
+- [ ] Run `npm run build` locally to verify no errors
+- [ ] Enable Vercel analytics (optional)
+
+### Required Secrets
+
+Set these in Vercel Environment Variables (never commit to repo):
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` (for admin operations only)
+
+Set these in GitHub Secrets (for CI/CD):
+
+- `VERCEL_TOKEN` (optional, for automated deployments)
+- `SUPABASE_SERVICE_ROLE_KEY` (optional, for running migrations in CI)
+
+## 🛡️ Security Notes
+
+⚠️ **Important Security Practices**:
+
+1. **Never commit secrets** to the repository
+2. **Service role key** should only be used server-side
+3. Use **Row Level Security (RLS)** in Supabase for data protection
+4. Keep dependencies updated: `npm audit` and `npm update`
+
+## 📞 Contact & Support
+
+- **Email**: destek@dezemu.com
+- **WhatsApp**: +90 539 526 32 93
+- **Website**: https://dezemu.com
+
+## 🤝 Contributing
+
+This is a single-vendor store. For feature requests or bug reports, contact the development team.
+
+## 📄 License
+
+Proprietary - All rights reserved by Dezemu
+
+---
+
+**Last Updated**: 2025-11-17  
+**Version**: 1.0.0

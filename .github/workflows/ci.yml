@@ -1,0 +1,106 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - feature/single-vendor
+  pull_request:
+    branches:
+      - main
+      - feature/single-vendor
+
+jobs:
+  lint-build-test:
+    name: Lint, Build, and Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run linter
+        run: npm run lint
+        continue-on-error: false
+      
+      - name: Build project
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'placeholder-key' }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID || 'placeholder' }}
+      
+      # Optional: Run tests if test script exists
+      # Uncomment when tests are added
+      # - name: Run tests
+      #   run: npm run test
+      #   if: hashFiles('**/*.test.*') != ''
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: dist/
+          retention-days: 7
+
+  # Optional: Run Supabase migrations
+  # Uncomment and configure when SUPABASE_SERVICE_ROLE_KEY is added to GitHub Secrets
+  # migrate:
+  #   name: Run Database Migration
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  #   needs: lint-build-test
+  #   
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #     
+  #     - name: Setup Supabase CLI
+  #       uses: supabase/setup-cli@v1
+  #       with:
+  #         version: latest
+  #     
+  #     - name: Run migrations
+  #       run: |
+  #         supabase db push --db-url "${{ secrets.SUPABASE_DB_URL }}"
+  #       env:
+  #         SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+  # Optional: Deploy to Vercel
+  # Uncomment and configure when VERCEL_TOKEN is added to GitHub Secrets
+  # deploy:
+  #   name: Deploy to Vercel
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  #   needs: lint-build-test
+  #   
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #     
+  #     - name: Deploy to Vercel
+  #       uses: amondnet/vercel-action@v25
+  #       with:
+  #         vercel-token: ${{ secrets.VERCEL_TOKEN }}
+  #         vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+  #         vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+  #         vercel-args: '--prod'
+
+# Security Notes:
+# - Never commit SUPABASE_SERVICE_ROLE_KEY, VERCEL_TOKEN, or other secrets to the repository
+# - Add secrets via GitHub Settings > Secrets and variables > Actions
+# - Required secrets for optional jobs:
+#   * SUPABASE_DB_URL: postgres://[user]:[password]@[host]/[database]
+#   * SUPABASE_SERVICE_ROLE_KEY: Your Supabase service role key
+#   * VERCEL_TOKEN: Your Vercel deployment token
+#   * VERCEL_ORG_ID: Your Vercel organization ID
+#   * VERCEL_PROJECT_ID: Your Vercel project ID
