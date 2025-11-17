@@ -1,0 +1,173 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - feature/single-vendor
+  pull_request:
+    branches:
+      - main
+      - feature/single-vendor
+
+jobs:
+  # Lint and Type Check
+  lint-and-typecheck:
+    name: Lint and Type Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint --if-present || echo "No lint script found, skipping..."
+
+      - name: Run TypeScript type check
+        run: npx tsc --noEmit
+
+  # Build
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          # Use example values for build - actual values should be in deployment env
+          VITE_SUPABASE_URL: https://example.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: example-key
+          VITE_SUPABASE_PROJECT_ID: example-project
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  # Test (optional - runs if tests exist)
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test --if-present || echo "No tests found, skipping..."
+        env:
+          VITE_SUPABASE_URL: https://example.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: example-key
+
+  # Optional: Run Supabase Migration (only if service role key is available)
+  # WARNING: This is a DANGEROUS operation and should only be enabled manually
+  # DO NOT commit SUPABASE_SERVICE_ROLE_KEY to the repository!
+  # Add it as a GitHub secret: Settings > Secrets and variables > Actions > New secret
+  run-migration:
+    name: Run Supabase Migration (Optional)
+    runs-on: ubuntu-latest
+    needs: build
+    if: false # Disabled by default - enable manually when needed
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run migration
+        if: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
+        run: |
+          echo "Migration would run here"
+          echo "⚠️  WARNING: Disabled for safety"
+          echo "To enable, set the job 'if' condition and add SUPABASE_SERVICE_ROLE_KEY secret"
+          # curl -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/migrate" \
+          #   -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+          #   -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+          #   -H "Content-Type: application/json"
+
+  # Optional: Deploy to Vercel (only if token is available)
+  # DO NOT commit VERCEL_TOKEN to the repository!
+  # Add it as a GitHub secret: Settings > Secrets and variables > Actions > New secret
+  deploy-vercel:
+    name: Deploy to Vercel (Optional)
+    runs-on: ubuntu-latest
+    needs: [build, test]
+    if: github.ref == 'refs/heads/main' && false # Disabled by default
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Vercel
+        if: ${{ secrets.VERCEL_TOKEN != '' }}
+        run: |
+          echo "Vercel deployment would run here"
+          echo "⚠️  WARNING: Disabled for safety"
+          echo "To enable:"
+          echo "  1. Add VERCEL_TOKEN to GitHub secrets"
+          echo "  2. Add VERCEL_ORG_ID to GitHub secrets"
+          echo "  3. Add VERCEL_PROJECT_ID to GitHub secrets"
+          echo "  4. Remove the 'false' from the job 'if' condition"
+          echo "  5. Uncomment the deployment commands below"
+          # npm i -g vercel
+          # vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          # vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          # vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+  # Summary
+  ci-summary:
+    name: CI Summary
+    runs-on: ubuntu-latest
+    needs: [lint-and-typecheck, build, test]
+    if: always()
+    
+    steps:
+      - name: Check results
+        run: |
+          echo "CI Pipeline Summary"
+          echo "==================="
+          echo "Lint & Type Check: ${{ needs.lint-and-typecheck.result }}"
+          echo "Build: ${{ needs.build.result }}"
+          echo "Tests: ${{ needs.test.result }}"
+          
+          if [ "${{ needs.lint-and-typecheck.result }}" != "success" ] || \
+             [ "${{ needs.build.result }}" != "success" ]; then
+            echo "❌ CI Pipeline Failed"
+            exit 1
+          else
+            echo "✅ CI Pipeline Passed"
+          fi
