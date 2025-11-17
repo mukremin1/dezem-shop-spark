@@ -28,6 +28,9 @@
     --ring: 25 95% 53%;
     --radius: 0.5rem;
 
+    /* Dezemu primary color - #ff6a00 */
+    --color-primary: #ff6a00;
+
     /* Sidebar opsiyonel */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 20 14.3% 4.1%;
