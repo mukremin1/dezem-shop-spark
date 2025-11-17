@@ -25,6 +25,8 @@ jobs:
   lint-and-typecheck:
     name: Lint and Type Check
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -50,6 +52,8 @@ jobs:
     name: Build Application
     runs-on: ubuntu-latest
     needs: lint-and-typecheck
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -81,6 +85,8 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
     needs: lint-and-typecheck
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -102,6 +108,8 @@ jobs:
     name: Database Migration
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+      contents: read
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.run_migration == 'true')
@@ -131,6 +139,8 @@ jobs:
     name: Deploy to Vercel
     runs-on: ubuntu-latest
     needs: [build, test]
+    permissions:
+      contents: read
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_to_vercel == 'true')
