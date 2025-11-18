@@ -33,5 +33,9 @@
     --sidebar-foreground: 20 14.3% 4.1%;
     --sidebar-primary: 25 95% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
+    
+    /* Single-vendor branding colors */
+    --color-primary: #ff6a00;
+    --color-primary-foreground: #ffffff;
   }
 }
