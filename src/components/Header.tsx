@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import SearchInput from "./SearchInput";
+import { MessageCircle, Mail } from "lucide-react";
 
 interface HeaderProps {
   searchQuery: string;
@@ -10,7 +11,9 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
   return (
     <header className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between p-4 bg-white shadow">
-      <div className="text-2xl font-bold">Dezemu</div>
+      <div className="flex items-center gap-2">
+        <div className="text-2xl font-bold" style={{ color: 'var(--color-primary, #ff6a00)' }}>Dezemu</div>
+      </div>
 
       {/* Mobilde tam genişlik, desktop'ta normal */}
       <div className="flex flex-col w-full md:flex-row md:items-center md:w-auto gap-3">
@@ -21,9 +24,25 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
           className="w-full md:w-64"
         />
 
-        <nav className="flex gap-4 text-sm md:text-base">
+        <nav className="flex gap-4 text-sm md:text-base items-center">
           <Link to="/" className="hover:text-blue-600">Anasayfa</Link>
           <Link to="/orders" className="hover:text-blue-600">Siparişlerim</Link>
+          <a 
+            href="https://wa.me/905395263293?text=Merhaba%20Dezemu" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="hover:text-green-600 flex items-center gap-1"
+            title="WhatsApp"
+          >
+            <MessageCircle className="h-4 w-4" />
+          </a>
+          <a 
+            href="mailto:destek@dezemu.com"
+            className="hover:text-blue-600 flex items-center gap-1"
+            title="Email"
+          >
+            <Mail className="h-4 w-4" />
+          </a>
         </nav>
       </div>
     </header>
