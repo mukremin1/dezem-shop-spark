@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # pinned full SHA for actions/checkout v4 (example)
 
       - name: Set up Node.js
-        uses: actions/setup-node@7e773fb4988ba3aafda99755c0b23f1977de325e # pinned full SHA for actions/setup-node v4 (example)
+        uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # pinned full SHA for actions/setup-node v4 (example)
         with:
           node-version: '18'
 
