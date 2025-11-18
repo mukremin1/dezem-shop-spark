@@ -8,14 +8,12 @@ on:
 jobs:
   migrate:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # pinned full SHA for actions/checkout v4 (example)
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@f7ae3c708a7c9ab714c7f88be14c277b8e8f3736 # pinned full SHA for actions/setup-node v4 (example)
         with:
           node-version: '18'
 
