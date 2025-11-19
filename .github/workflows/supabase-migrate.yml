@@ -58,4 +58,9 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         run: |
           supabase --version
+<<<<<<< Updated upstream
           supabase db push --project-ref "$SUPABASE_PROJECT_REF" --debug
+=======
+          supabase db push --project-ref "$SUPABASE_PROJECT_REF" --debug
+
+>>>>>>> Stashed changes
