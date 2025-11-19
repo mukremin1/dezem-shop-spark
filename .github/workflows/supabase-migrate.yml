@@ -43,7 +43,7 @@ jobs:
       - name: Upload built site for Pages
         uses: actions/upload-pages-artifact@v1
         with:
-          path: ./build   # <-- Eğer build çıktın dist/ veya out/ ise burayı değiştir
+          path: ./dist   # <-- Eğer build çıktın dist/ veya out/ ise burayı değiştir
 
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v1
