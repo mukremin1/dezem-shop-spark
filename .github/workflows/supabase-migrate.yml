@@ -45,6 +45,12 @@ jobs:
         run: |
           supabase link --project-ref "$SUPABASE_PROJECT_REF"
 
+      - name: Authenticate with service role (for migration apply)
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          echo "Using service role key from secrets"
+
       - name: Apply migrations (verbose)
         env:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
