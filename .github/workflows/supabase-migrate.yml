@@ -1,4 +1,4 @@
-﻿name: Run Supabase migrations
+name: Run Supabase migrations
 
 on:
   workflow_dispatch:
