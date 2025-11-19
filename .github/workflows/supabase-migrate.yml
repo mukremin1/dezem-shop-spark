@@ -10,31 +10,46 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # pinned full SHA for actions/checkout v4 (example)
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # pinned full SHA for actions/setup-node v4 (example)
+        uses: actions/setup-node@v3
         with:
           node-version: '18'
 
       - name: Install supabase CLI
         run: npm install -g supabase@latest
 
+      - name: Debug env (do not print secrets)
+        env:
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          # don't print secret values — only check presence
+          if [ -z "${SUPABASE_PROJECT_REF}" ]; then
+            echo "ERROR: SUPABASE_PROJECT_REF is MISSING"
+            exit 1
+          else
+            echo "OK: SUPABASE_PROJECT_REF is set"
+          fi
+          if [ -z "${SUPABASE_SERVICE_ROLE_KEY}" ]; then
+            echo "ERROR: SUPABASE_SERVICE_ROLE_KEY is MISSING"
+            exit 1
+          else
+            echo "OK: SUPABASE_SERVICE_ROLE_KEY is set"
+          fi
+
       - name: Link Supabase project
         env:
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
         run: |
-          supabase link --project-ref $SUPABASE_PROJECT_REF
+          supabase link --project-ref "$SUPABASE_PROJECT_REF"
 
-      - name: Authenticate with service role (for migration apply)
+      - name: Apply migrations (verbose)
         env:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: |
-          echo "Using service role key from secrets"
-
-      - name: Apply migrations
-        run: |
-          supabase db push --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
-        env:
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        run: |
+          supabase --version
+          supabase db push --project-ref "$SUPABASE_PROJECT_REF" --debug
