@@ -1,5 +1,3 @@
-name: Run migrations and publish to GitHub Pages
-
 on:
   workflow_dispatch:
   push:
@@ -22,18 +20,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
-      - name: Setup Node.js
+      - name: Setup Node.js (use compatible Node for supabase)
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
-          node-version: '18'
+          node-version: '22'
 
-      - name: Install supabase CLI
-        run: npm install -g supabase@latest
+      - name: Configure SUPABASE_ACCESS_TOKEN from service role key
+        if: env.SUPABASE_SERVICE_ROLE_KEY != ''
+        run: echo "SUPABASE_ACCESS_TOKEN=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> $GITHUB_ENV
 
-      - name: Link and apply Supabase migrations
+      - name: Verify Node and run supabase CLI via npx (no global install)
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ env.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
         run: |
-          supabase link --project-ref $SUPABASE_PROJECT_REF
-          supabase db push --project-ref $SUPABASE_PROJECT_REF
+          node --version
+          npm --version
+          # show version (will download & run latest without global install)
+          npx --yes supabase@latest --version
+          # link and push migrations via npx
+          npx --yes supabase@latest link --project-ref "$SUPABASE_PROJECT_REF"
+          npx --yes supabase@latest db push --project-ref "$SUPABASE_PROJECT_REF"
 
   build-and-deploy:
     name: Build site and publish to GitHub Pages
@@ -50,7 +57,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
-          node-version: '18'
+          node-version: '22'
 
       - name: Install dependencies
         run: npm ci
@@ -58,7 +65,7 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Detect publish directory
+      - name: Detect publish directory (and debug)
         run: |
           # Common static output dirs: out (Next export), build, dist, public
           if [ -d "./out" ]; then echo "PUBLISH_DIR=out" >> $GITHUB_ENV
@@ -66,8 +73,18 @@ jobs:
           elif [ -d "./dist" ]; then echo "PUBLISH_DIR=dist" >> $GITHUB_ENV
           elif [ -d "./public" ]; then echo "PUBLISH_DIR=public" >> $GITHUB_ENV
           else
-            echo "No common publish directory found. If your project outputs to a different folder, set PUBLISH_DIR as a job env or update this workflow." && exit 1
+            echo "No common publish directory found. List current dir for debug:" >&2
+            ls -la
+            echo "If your build outputs elsewhere, set PUBLISH_DIR job env or change build step." >&2
+            exit 1
           fi
+          echo "Publish dir set to: $PUBLISH_DIR"
+
+      - name: Show publish directory contents (debug)
+        run: |
+          echo "Listing publish directory ($PUBLISH_DIR):"
+          ls -la "$PUBLISH_DIR" || (echo "Publish dir missing or empty" && exit 1)
+          du -sh "$PUBLISH_DIR" || true
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v3
