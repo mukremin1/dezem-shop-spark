@@ -1,9 +1,7 @@
-// This file is a safe, improved supabase client wrapper.
-// It reads env vars from import.meta.env (Vite) or process.env (server/CI).
-// If env vars are missing, it logs a clear warning and exports a small stub
-// to avoid crashing the whole app during development.
-//
-// NOT: Gerçek anahtarları .env'e koyun ve asla repoya commit etmeyin.
+// DEBUG: env var varlığını kontrol et (geçici - testten sonra kaldırın)
+console.log("[DEBUG] import.meta.env.VITE_SUPABASE_URL present:", !!(import.meta as any).env?.VITE_SUPABASE_URL);
+console.log("[DEBUG] import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY present:", !!(import.meta as any).env?.VITE_SUPABASE_PUBLISHABLE_KEY);
+console.log("[DEBUG] process.env.VITE_SUPABASE_URL present:", !!(process as any)?.env?.VITE_SUPABASE_URL);
 
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
@@ -28,12 +26,9 @@ const SUPABASE_PUBLISHABLE_KEY =
 if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
   console.warn(
     "[supabase/client] VITE_SUPABASE_URL veya VITE_SUPABASE_PUBLISHABLE_KEY tanımlı değil. " +
-      "Lütfen proje kökünde .env dosyasına bu değişkenleri ekleyip dev server'ı yeniden başlatın. " +
-      "(Anahtarları repoya commit etmeyin.)"
+      "Lütfen .env'e ekleyip dev server'ı yeniden başlatın. (Anahtarları repoya commit etmeyin.)"
   );
 
-  // Basit stub: uygulamanın tümünün çökmesini engeller.
-  // Gerçek bir DB operasyonu yapıldığında açık bir hata verir.
   const stub = {
     auth: {
       getUser: async () => ({ data: { user: null }, error: null }),
@@ -41,31 +36,17 @@ if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
       signOut: async () => ({ error: new Error("Supabase yapılandırılmadı") }),
     },
     from: (table: string) => ({
-      select: async (..._args: any[]) => {
-        throw new Error(`Supabase yapılandırılmadı. Denenen tablo: ${table}`);
-      },
-      insert: async (..._args: any[]) => {
-        throw new Error(`Supabase yapılandırılmadı. Denenen tablo: ${table}`);
-      },
-      update: async (..._args: any[]) => {
-        throw new Error(`Supabase yapılandırılmadı. Denenen tablo: ${table}`);
-      },
-      delete: async (..._args: any[]) => {
-        throw new Error(`Supabase yapılandırılmadı. Denenen tablo: ${table}`);
-      },
+      select: async (..._args: any[]) => { throw new Error(`Supabase yapılandırılmadı. Table: ${table}`); },
+      insert: async (..._args: any[]) => { throw new Error(`Supabase yapılandırılmadı. Table: ${table}`); },
+      update: async (..._args: any[]) => { throw new Error(`Supabase yapılandırılmadı. Table: ${table}`); },
+      delete: async (..._args: any[]) => { throw new Error(`Supabase yapılandırılmadı. Table: ${table}`); },
     }),
   } as unknown;
 
   export const supabase: any = stub;
 } else {
-  // Tarayıcı ortamında localStorage varsa auth.storage olarak ver.
-  const authOptions: Record<string, any> = {
-    persistSession: true,
-    autoRefreshToken: true,
-  };
-  if (typeof window !== "undefined" && typeof window.localStorage !== "undefined") {
-    authOptions.storage = window.localStorage;
-  }
+  const authOptions: Record<string, any> = { persistSession: true, autoRefreshToken: true };
+  if (typeof window !== "undefined" && typeof window.localStorage !== "undefined") authOptions.storage = window.localStorage;
 
   export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: authOptions,
