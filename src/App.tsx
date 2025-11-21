@@ -1,3 +1,4 @@
+import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "@/components/Header";
 import { SearchPage } from "@/pages/SearchPage";
@@ -7,9 +8,13 @@ import Login from "@/components/Login";
 import Dashboard from "@/pages/Dashboard";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
+// Vite'de production build sırasında BASE_URL otomatik ayarlanır.
+// Localde import.meta.env.BASE_URL genelde "/" olur.
+const basename = (import.meta as any).env?.BASE_URL || "/";
+
 export const App = () => {
   return (
-    <Router>
+    <Router basename={basename}>
       <Header />
       <Routes>
         <Route path="/" element={<HomePage />} />
