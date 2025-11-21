@@ -20,6 +20,6 @@ export default defineConfig({
       input: "index.html",
     },
   },
-  // Eğer GitHub Pages ile deploy yapacaksanız repo adı ile eşleştirilmiş base kullanın:
-  base: "/dezem-shop-spark/",
+  // local geliştirme için "/" , production (deploy) için repo alt dizini
+  base: process.env.NODE_ENV === "production" ? "/dezem-shop-spark/" : "/",
 });
