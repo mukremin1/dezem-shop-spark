@@ -8,9 +8,7 @@ import Login from "@/components/Login";
 import Dashboard from "@/pages/Dashboard";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
-// Vite'de production build sırasında BASE_URL otomatik ayarlanır.
-// Localde import.meta.env.BASE_URL genelde "/" olur.
-const basename = (import.meta as any).env?.BASE_URL || "/";
+const basename = (import.meta as any).env?.BASE_URL ?? "/";
 
 export const App = () => {
   return (
