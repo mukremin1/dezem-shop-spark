@@ -1,0 +1,1 @@
+﻿-- (Yukarıdaki SQL'i buraya tüm içeriğiyle yapıştırmayın; bunun yerine yukarıdaki bloğu bir dosyaya kaydedin)
