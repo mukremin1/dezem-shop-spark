@@ -36,6 +36,7 @@ jobs:
         run: |
           node --version
           npm --version
+          # show version (will download & run latest without global install)
           npx --yes supabase@latest --version
           npx --yes supabase@latest link --project-ref "$SUPABASE_PROJECT_REF"
           npx --yes supabase@latest db push --project-ref "$SUPABASE_PROJECT_REF"
@@ -63,6 +64,7 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Common static output dirs: out (Next export), build, dist, public
       - name: Detect publish directory (and debug)
         run: |
           if [ -d "./out" ]; then echo "PUBLISH_DIR=out" >> $GITHUB_ENV
