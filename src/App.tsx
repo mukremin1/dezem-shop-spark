@@ -7,6 +7,7 @@ import Signup from "@/components/Signup";
 import Login from "@/components/Login";
 import Dashboard from "@/pages/Dashboard";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
 
 // import.meta.env.BASE_URL Vite tarafından sağlanır
 const rawBase = (import.meta as any).env?.BASE_URL ?? "/";
@@ -26,6 +27,7 @@ export const App = () => {
         <Route path="/search" element={<SearchPage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route
           path="/dashboard"
           element={
