@@ -4,16 +4,22 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
 
-/** import.meta.env veya process.env içinden bir değişken okur */
+/** import.meta.env veya process.env içinden bir değişken okur (güvenli: process kontrolü yapar) */
 function getEnv(name: string): string | undefined {
+  // Öncelikle import.meta.env varsa onu dene (Vite, Snowpack vb. için)
   try {
     const v = (import.meta as any)?.env?.[name];
     if (typeof v === "string" && v.length > 0) return v;
   } catch {
     // import.meta erişimi başarısız olursa yoksay
   }
-  const p = (process as any)?.env?.[name];
-  if (typeof p === "string" && p.length > 0) return p;
+
+  // Tarayıcı ortamında `process` olmayabilir; bu yüzden önce typeof kontrolü yapıyoruz.
+  if (typeof process !== "undefined") {
+    const p = (process as any)?.env?.[name];
+    if (typeof p === "string" && p.length > 0) return p;
+  }
+
   return undefined;
 }
 
