@@ -43,10 +43,6 @@ const stub = {
   }),
 } as unknown as ReturnType<typeof createClient>;
 
-/**
- * Top-level olarak supabase değişkenini tanımlayıp sonra export ediyoruz.
- * Böylece export ifadeleri blok içinde yer almaz ve esbuild hatası ortadan kalkar.
- */
 let supabase: any;
 
 if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
@@ -62,6 +58,5 @@ if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
   });
 }
 
-// Top-level export (geçerli ES module sözdizimi)
 export { supabase };
 export default supabase;
