@@ -1,65 +1,110 @@
+import React from "react";
 import { Link } from "react-router-dom";
 
-export const Footer = () => {
+const Footer: React.FC = () => {
+  const siteName = (import.meta as any).env?.VITE_SITE_NAME ?? "Dezemu";
+  const supportEmail = (import.meta as any).env?.VITE_SUPPORT_EMAIL ?? "destek@dezemu.com";
+  const siteUrl = (import.meta as any).env?.VITE_SITE_URL ?? "https://dezemu.com/";
+  const year = new Date().getFullYear();
+
+  const footerStyle: React.CSSProperties = {
+    padding: 16,
+    textAlign: "center",
+    marginTop: 24,
+    borderTop: "1px solid #eaeaea",
+    background: "#fff",
+  };
+
+  const navStyle: React.CSSProperties = {
+    display: "flex",
+    gap: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    flexWrap: "wrap",
+    marginBottom: 8,
+  };
+
+  const smallStyle: React.CSSProperties = {
+    marginTop: 8,
+    fontSize: 12,
+    color: "#666",
+  };
+
+  const linkStyle: React.CSSProperties = {
+    color: "inherit",
+    textDecoration: "none",
+  };
+
+  // ekran-okuyucu gizli metin stili (inline, global css yoksa çalışır)
+  const srOnly: React.CSSProperties = {
+    border: 0,
+    clip: "rect(0 0 0 0)",
+    height: "1px",
+    margin: "-1px",
+    overflow: "hidden",
+    padding: 0,
+    position: "absolute",
+    width: "1px",
+    whiteSpace: "nowrap",
+  };
+
+  // JSON-LD organization structured data
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: siteName,
+    url: siteUrl,
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        email: supportEmail,
+        contactType: "customer support",
+      },
+    ],
+  };
+
   return (
-    <footer className="border-t bg-muted/50 mt-auto">
-      <div className="container py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div>
-            <h3 className="font-bold text-lg mb-4">DEZEMU</h3>
-            <p className="text-sm text-muted-foreground">
-              Güvenilir e-ticaret deneyimi için doğru adres.
-            </p>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-4">Kurumsal</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>
-                <Link to="/about" className="hover:text-foreground">
-                  Hakkımızda
-                </Link>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-4">Yardım</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>
-                <Link to="/faq" className="hover:text-foreground">
-                  SSS
-                </Link>
-              </li>
-              <li>
-                <Link to="/shipping" className="hover:text-foreground">
-                  Kargo & İade
-                </Link>
-              </li>
-              <li className="hover:text-foreground cursor-pointer">Ödeme Yöntemleri</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-4">Yasal</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="hover:text-foreground cursor-pointer">Gizlilik Politikası</li>
-              <li className="hover:text-foreground cursor-pointer">Kullanım Koşulları</li>
-              <li className="hover:text-foreground cursor-pointer">KVKK</li>
-            </ul>
-          </div>
-        </div>
-        <div className="mt-8 pt-8 border-t">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-            <p>&copy; 2025 DEZEMU. Tüm hakları saklıdır.</p>
-            <div className="flex gap-4">
-              <a href="mailto:destek@dezemu.com" className="hover:text-foreground">
-                destek@dezemu.com
-              </a>
-              <a href="tel:+905395263293" className="hover:text-foreground">
-                +90 539 526 32 93
-              </a>
-            </div>
-          </div>
-        </div>
+    <footer role="contentinfo" style={footerStyle}>
+      {/* Erişilebilirlik: ekran okuyucular için kısa açıklama (görünmez) */}
+      <span style={srOnly}>{`${siteName} iletişim: ${supportEmail}`}</span>
+
+      <nav aria-label="footer" style={navStyle}>
+        <Link
+          to="/privacy-policy"
+          style={linkStyle}
+          aria-label="Gizlilik Politikası sayfasına git"
+          data-testid="footer-privacy"
+        >
+          Gizlilik Politikası
+        </Link>
+
+        <Link
+          to="/terms"
+          style={linkStyle}
+          aria-label="Kullanım Şartları sayfasına git"
+          data-testid="footer-terms"
+        >
+          Kullanım Şartları
+        </Link>
+
+        <a
+          href={`mailto:${supportEmail}`}
+          style={linkStyle}
+          aria-label={`E-posta ile iletişim: ${supportEmail}`}
+          data-testid="footer-contact"
+        >
+          İletişim
+        </a>
+      </nav>
+
+      <div style={smallStyle}>
+        © {year} {siteName} · Tüm hakları saklıdır.
       </div>
+
+      {/* JSON-LD yapılandırma (arama motorları için) */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
     </footer>
   );
 };
+
+export default Footer;
