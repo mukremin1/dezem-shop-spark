@@ -9,6 +9,7 @@ import Signup from "@/components/Signup";
 import Login from "@/components/Login";
 import Dashboard from "@/pages/Dashboard";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import SssPage from "@/pages/Sss";
 
 const rawBase = (import.meta as any).env?.BASE_URL ?? "/";
 const basename = rawBase === "/" ? "/" : rawBase.replace(/\/$/, "");
