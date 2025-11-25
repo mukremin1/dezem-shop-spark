@@ -1,4 +1,4 @@
-on:
+﻿on:
   workflow_dispatch:
   push:
     branches: [ main ]
@@ -65,12 +65,13 @@ jobs:
 
       - name: Detect publish directory (and debug)
         run: |
+          # Common static output dirs: out (Next export), build, dist, public
           if [ -d "./out" ]; then echo "PUBLISH_DIR=out" >> $GITHUB_ENV
           elif [ -d "./build" ]; then echo "PUBLISH_DIR=build" >> $GITHUB_ENV
           elif [ -d "./dist" ]; then echo "PUBLISH_DIR=dist" >> $GITHUB_ENV
           elif [ -d "./public" ]; then echo "PUBLISH_DIR=public" >> $GITHUB_ENV
           else
-            echo "No common publish directory found. List current dir for debug:" >&2
+            echo "No common publish directory found. Listing current dir for debug:" >&2
             ls -la
             echo "If your build outputs elsewhere, set PUBLISH_DIR job env or change build step." >&2
             exit 1
