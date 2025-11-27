@@ -37,7 +37,7 @@ export default function Login() {
     setForgotMsg(null);
     try {
       // Try Supabase v2 method, fallback to legacy api.resetPasswordForEmail if present.
-      # @ts-ignore
+      // @ts-ignore
       const res = await supabase.auth.resetPasswordForEmail?.(email) ?? await supabase.auth.api?.resetPasswordForEmail?.(email);
       if (res && (res as any).error) {
         setForgotMsg((res as any).error.message || "Şifre sıfırlama isteği gönderilirken bir hata oluştu.");
