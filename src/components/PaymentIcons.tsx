@@ -70,7 +70,7 @@ const PaymentIcons: React.FC<{ className?: string }> = ({ className }) => {
         gap: 16,
         alignItems: "center",
         justifyContent: "center",
-        padding: "12px 8px",
+        padding: "8px 12px",
       }}
     >
       <MastercardIcon />
