@@ -10,8 +10,6 @@ import Login from "@/components/Login";
 import Dashboard from "@/pages/Dashboard";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import SssPage from "@/pages/Sss";
-import PaymentsBar from './components/PaymentsBar';
-
 const rawBase = (import.meta as any).env?.BASE_URL ?? "/";
 const basename = rawBase === "/" ? "/" : rawBase.replace(/\/$/, "");
 
@@ -36,10 +34,11 @@ export const App = () => {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />
-      <PaymentsBar offsetFromBottom={0} />
+      
     </Router>
   );
 };
 
 export default App;
+
 
