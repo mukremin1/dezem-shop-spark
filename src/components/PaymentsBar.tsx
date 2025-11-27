@@ -1,12 +1,6 @@
 ﻿import React from "react";
 import PaymentIcons from "./PaymentIcons";
 
-/**
- * PaymentsBar
- * - Renders a fixed bottom bar with Mastercard, Visa, Troy icons.
- * - If you have a floating WhatsApp button, adjust offsetFromBottom to avoid overlap.
- */
-
 const PaymentsBar: React.FC<{ offsetFromBottom?: number }> = ({ offsetFromBottom = 0 }) => {
   return (
     <div
