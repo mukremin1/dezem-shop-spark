@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import SearchInput from "./SearchInput";
 import { MessageCircle, Mail } from "lucide-react";
@@ -29,9 +29,17 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
   return (
     <header className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between p-4 bg-white shadow">
       <div className="flex items-center gap-2">
-        <Link to="/" className="text-2xl font-bold" style={{ color: "var(--color-primary, #ff6a00)" }}>
-          Dezemu
-        </Link>
+        <div>
+          <Link
+            to="/"
+            className="text-2xl font-bold text-orange-600"
+            style={{ color: "var(--color-primary, #ff6a00)" }}
+            aria-label="Dezemu ana sayfa"
+          >
+            Dezemu
+          </Link>
+          <p className="text-xs md:text-sm text-gray-600 mt-1">Kaliteyle buluşan yerel alışveriş deneyimi</p>
+        </div>
       </div>
 
       {/* Mobilde tam genişlik, desktop'ta normal */}
