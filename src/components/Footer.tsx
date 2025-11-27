@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+﻿import React from "react";
 import { Link } from "react-router-dom";
 
 const Footer: React.FC = () => {
@@ -7,98 +7,35 @@ const Footer: React.FC = () => {
   const siteUrl = (import.meta as any).env?.VITE_SITE_URL ?? "https://dezemu.com/";
   const year = new Date().getFullYear();
 
-  // İletişim bilgileri
-  const address = "Palandöken / Erzurum";
-  const phone = "+90 539 526 3293";
-  const whatsappPhone = "905395263293"; // wa.me expects no plus or spaces
-  const whatsappText = encodeURIComponent("Merhaba Dezemu, ürünler hakkında bilgi almak istiyorum.");
-
-  // Kısa kullanım şartları özeti (footer için)
-  const termsSummary =
-    "Dezemu üzerinde yapılan tüm alışverişler ve kullanıcı etkileşimleri için geçerli genel kullanım kuralları. Ürün açıklamalarına ve ödeme koşullarına dikkat ediniz. İade, değişim ve garanti koşulları ürün sayfasında belirtilmiştir.";
-
-  // Hakkımızda metni
-  const aboutText =
-    "Dezemu, kaliteli ürünleri uygun fiyatlarla sunmayı hedefleyen yerel e-ticaret girişimidir. Müşteri memnuniyeti ve güvenilir destek hizmeti odaklı çalışıyoruz. Yerel tedarikçilerle iş birliği yaparak geniş ürün yelpazesi sunuyoruz.";
-
-  const [showTerms, setShowTerms] = useState(false);
-  const [showAbout, setShowAbout] = useState(false);
-
   const footerStyle: React.CSSProperties = {
-    padding: 20,
-    background: "#ffffff",
+    padding: 16,
+    textAlign: "center",
+    marginTop: 24,
     borderTop: "1px solid #eaeaea",
-    marginTop: 32,
-  };
-
-  const containerStyle: React.CSSProperties = {
-    maxWidth: 1100,
-    margin: "0 auto",
-    padding: "0 16px",
-    display: "flex",
-    flexDirection: "column",
-    gap: 12,
-  };
-
-  const topRowStyle: React.CSSProperties = {
-    display: "flex",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    gap: 16,
-    alignItems: "flex-start",
+    background: "#fff",
   };
 
   const navStyle: React.CSSProperties = {
     display: "flex",
     gap: 12,
+    justifyContent: "center",
     alignItems: "center",
     flexWrap: "wrap",
-  };
-
-  const contactBoxStyle: React.CSSProperties = {
-    display: "flex",
-    flexDirection: "column",
-    gap: 6,
-    minWidth: 240,
-    background: "#fffdf8",
-    padding: 12,
-    borderRadius: 8,
-    border: "1px solid #fff1e6",
-  };
-
-  const contactLineStyle: React.CSSProperties = {
-    fontSize: 14,
-    color: "#111827",
+    marginBottom: 8,
   };
 
   const smallStyle: React.CSSProperties = {
-    color: "#6b7280",
-    fontSize: 13,
+    marginTop: 8,
+    fontSize: 12,
+    color: "#666",
   };
 
   const linkStyle: React.CSSProperties = {
-    color: "#111827",
-    textDecoration: "none",
-    fontWeight: 600,
-  };
-
-  const buttonLinkStyle: React.CSSProperties = {
-    background: "none",
-    border: "none",
-    padding: 0,
-    margin: 0,
-    cursor: "pointer",
-    color: "#111827",
-    fontWeight: 600,
-  };
-
-  const highlightStyle: React.CSSProperties = {
-    color: "#ff6a00",
-    fontWeight: 700,
+    color: "inherit",
     textDecoration: "none",
   };
 
+  // ekran-okuyucu gizli metin stili (inline, global css yoksa çalışır)
   const srOnly: React.CSSProperties = {
     border: 0,
     clip: "rect(0 0 0 0)",
@@ -111,6 +48,7 @@ const Footer: React.FC = () => {
     whiteSpace: "nowrap",
   };
 
+  // JSON-LD organization structured data
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -119,159 +57,100 @@ const Footer: React.FC = () => {
     contactPoint: [
       {
         "@type": "ContactPoint",
-        telephone: phone,
         email: supportEmail,
         contactType: "customer support",
       },
     ],
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "Palandöken",
-      addressLocality: "Erzurum",
-      addressCountry: "TR",
-    },
+  };
+
+  // WhatsApp contact (read from env). Accepts values like "+905551234567", "905551234567", "55 512 345 67" etc.
+  const whatsappNumberRaw =
+    (import.meta as any).env?.VITE_WHATSAPP_NUMBER ??
+    (import.meta as any).env?.VITE_SUPPORT_PHONE ??
+    "";
+  const whatsappNumberDigits = whatsappNumberRaw.replace(/\D/g, "");
+  const whatsappLink = whatsappNumberDigits ? `https://wa.me/${whatsappNumberDigits}` : "https://wa.me/";
+
+  const whatsappButtonStyle: React.CSSProperties = {
+    position: "fixed",
+    right: 16,
+    bottom: 16,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    background: "#25D366",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#fff",
+    textDecoration: "none",
+    boxShadow: "0 6px 18px rgba(37,211,102,0.3)",
+    zIndex: 9999,
+  };
+
+  const whatsappSvgStyle: React.CSSProperties = {
+    width: 28,
+    height: 28,
+    fill: "currentColor",
   };
 
   return (
-    <>
-      <footer role="contentinfo" style={footerStyle}>
-        <div style={containerStyle}>
-          <span style={srOnly}>{`${siteName} iletişim: ${supportEmail}, ${phone}, ${address}`}</span>
+    <footer role="contentinfo" style={footerStyle}>
+      {/* Erişilebilirlik: ekran okuyucular için kısa açıklama (görünmez) */}
+      <span style={srOnly}>{`${siteName} iletişim: ${supportEmail}`}</span>
 
-          <div style={topRowStyle}>
-            <div style={{ minWidth: 300 }}>
-              <nav aria-label="footer-links" style={navStyle}>
-                <Link to="/privacy-policy" style={linkStyle} aria-label="Gizlilik Politikası">
-                  Gizlilik Politikası
-                </Link>
+      <nav aria-label="footer" style={navStyle}>
+        <Link
+          to="/privacy-policy"
+          style={linkStyle}
+          aria-label="Gizlilik Politikası sayfasına git"
+          data-testid="footer-privacy"
+        >
+          Gizlilik Politikası
+        </Link>
 
-                <button
-                  type="button"
-                  onClick={() => setShowTerms((s) => !s)}
-                  aria-expanded={showTerms}
-                  aria-controls="footer-terms-summary"
-                  style={buttonLinkStyle}
-                >
-                  Kullanım Şartları
-                </button>
+        <Link
+          to="/terms"
+          style={linkStyle}
+          aria-label="Kullanım Şartları sayfasına git"
+          data-testid="footer-terms"
+        >
+          Kullanım Şartları
+        </Link>
 
-                <button
-                  type="button"
-                  onClick={() => setShowAbout((s) => !s)}
-                  aria-expanded={showAbout}
-                  aria-controls="footer-about"
-                  style={buttonLinkStyle}
-                >
-                  Hakkımızda
-                </button>
+        <a
+          href={`mailto:${supportEmail}`}
+          style={linkStyle}
+          aria-label={`E-posta ile iletişim: ${supportEmail}`}
+          data-testid="footer-contact"
+        >
+          İletişim
+        </a>
+      </nav>
 
-                <a href={`mailto:${supportEmail}`} style={linkStyle} aria-label="E-posta ile iletişim">
-                  İletişim
-                </a>
-              </nav>
+      <div style={smallStyle}>
+        © {year} {siteName} · Tüm hakları saklıdır.
+      </div>
 
-              <div
-                id="footer-terms-summary"
-                aria-hidden={!showTerms}
-                style={{ marginTop: 10, maxWidth: 640, display: showTerms ? "block" : "none" }}
-              >
-                <h4 style={{ margin: "8px 0", fontSize: 15 }}>Kullanım Şartları (Kısa Özet)</h4>
-                <p style={{ margin: 0, color: "#374151", fontSize: 13 }}>{termsSummary}</p>
-                <p style={{ marginTop: 8, fontSize: 13 }}>
-                  Daha detaylı bilgi için <Link to="/terms" style={highlightStyle}>tam metni görüntüleyin</Link>.
-                </p>
-              </div>
-            </div>
+      {/* JSON-LD yapılandırma (arama motorları için) */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-            {/* İletişim kutusu — ayrı ve dolu olarak gösteriliyor */}
-            <aside style={contactBoxStyle} aria-label="İletişim bilgileri">
-              <div style={{ fontWeight: 700, color: "#111827" }}>{address}</div>
-
-              <div style={contactLineStyle}>
-                Telefon:{" "}
-                <a href={`tel:${phone.replace(/\s+/g, "")}`} style={highlightStyle} aria-label={`Telefon: ${phone}`}>
-                  {phone}
-                </a>
-              </div>
-
-              <div style={contactLineStyle}>
-                WhatsApp:{" "}
-                <a
-                  href={`https://wa.me/${whatsappPhone}?text=${whatsappText}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={highlightStyle}
-                  aria-label="WhatsApp ile iletişim"
-                >
-                  +90 539 526 3293
-                </a>
-              </div>
-
-              <div style={contactLineStyle}>
-                E-posta:{" "}
-                <a href={`mailto:${supportEmail}`} style={highlightStyle} aria-label={`E-posta: ${supportEmail}`}>
-                  {supportEmail}
-                </a>
-              </div>
-
-              <div style={{ marginTop: 8, color: "#6b7280", fontSize: 13 }}>
-                Çalışma Saatleri: <span style={{ color: "#111827" }}>Pzt–Cuma: 09:00–18:00, Cmt: 10:00–16:00, Paz: Kapalı</span>
-              </div>
-
-              <div style={{ marginTop: 8, fontSize: 13, color: "#374151" }}>
-                Destek için yukarıdaki numara/e-posta üzerinden veya WhatsApp üzerinden bize ulaşabilirsiniz. Genellikle 24 saat içinde dönüş yapıyoruz.
-              </div>
-            </aside>
-          </div>
-
-          <div
-            id="footer-about"
-            aria-hidden={!showAbout}
-            style={{ marginTop: 18, paddingTop: 12, borderTop: "1px solid #f3f4f6", display: showAbout ? "block" : "none" }}
-          >
-            <h4 style={{ margin: "4px 0", fontSize: 15 }}>Hakkımızda</h4>
-            <p style={{ margin: 0, color: "#374151", fontSize: 13 }}>{aboutText}</p>
-          </div>
-
-          <div style={{ marginTop: 12, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-            <div style={smallStyle}>© {year} {siteName} · Tüm hakları saklıdır.</div>
-            <div style={smallStyle}>Geliştirme &amp; Destek: <a href={`mailto:${supportEmail}`} style={highlightStyle}>{supportEmail}</a></div>
-          </div>
-        </div>
-
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      </footer>
-
-      {/* Floating WhatsApp button (sağ alt köşe) */}
+      {/* WhatsApp floating button */}
       <a
-        href={`https://wa.me/${whatsappPhone}?text=${whatsappText}`}
+        href={whatsappLink}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="WhatsApp ile iletişim"
-        title="WhatsApp ile iletişim"
-        style={{
-          position: "fixed",
-          right: 16,
-          bottom: 16,
-          width: 56,
-          height: 56,
-          borderRadius: 9999,
-          background: "#25D366",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          boxShadow: "0 6px 18px rgba(37,211,102,0.2)",
-          zIndex: 9999,
-        }}
+        aria-label={`WhatsApp ile iletişim ${whatsappNumberRaw ? whatsappNumberRaw : ""}`}
+        title={whatsappNumberRaw ? `WhatsApp: ${whatsappNumberRaw}` : "WhatsApp"}
+        data-testid="footer-whatsapp"
+        style={whatsappButtonStyle}
       >
-        {/* WhatsApp SVG icon (simple, high-contrast) */}
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden focusable="false" xmlns="http://www.w3.org/2000/svg">
-          <path d="M20.52 3.48A11.88 11.88 0 0012.06 0C5.42 0 .18 5.24.18 11.88c0 2.09.55 4.13 1.6 5.93L0 24l6.32-1.62A11.86 11.86 0 0012.06 24c6.64 0 11.88-5.24 11.88-11.88 0-3.18-1.24-6.17-3.42-8.64z" fill="#ffffff" opacity="0.06"/>
-          <path d="M18.3 5.7a9.05 9.05 0 00-6.24-2.58c-5.02 0-9.1 4.08-9.1 9.1 0 1.6.42 3.14 1.22 4.5L3 21.6l4.02-1.06a9.06 9.06 0 004.04 0c4.06 0 7.88-2.48 9.1-6.08a9.05 9.05 0 00-2.86-8.83z" fill="#25D366"/>
-          <path d="M16.1 14.1c-.22-.11-1.3-.64-1.5-.72-.2-.08-.35-.11-.5.11-.16.22-.62.72-.76.87-.14.16-.28.18-.5.07-.2-.11-.85-.31-1.62-.98-.6-.54-1.01-1.2-1.13-1.43-.12-.23-.01-.34.09-.45.09-.1.2-.28.3-.42.1-.14.14-.23.21-.38.07-.14.03-.27-.02-.38-.05-.11-.5-1.2-.68-1.64-.18-.43-.36-.37-.5-.38l-.42-.01c-.14 0-.36.05-.55.23-.19.18-.72.7-.72 1.7s.74 1.97.84 2.11c.1.14 1.45 2.22 3.52 3.12 2.07.9 2.07.6 2.45.56.38-.04 1.23-.5 1.4-1.01.17-.5.17-.93.12-1.02-.05-.09-.18-.14-.4-.24z" fill="#fff"/>
+        {/* WhatsApp SVG icon */}
+        <svg viewBox="0 0 24 24" style={whatsappSvgStyle} aria-hidden="true" focusable="false">
+          <path d="M20.52 3.48A11.9 11.9 0 0012 0C5.373 0 0 5.373 0 12a11.9 11.9 0 001.67 6.01L0 24l6.3-1.59A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12 0-3.2-1.25-6.2-3.48-8.52zM12 22.08c-1.7 0-3.36-.44-4.82-1.27l-.34-.2-3.74.94.99-3.64-.21-.37A9.06 9.06 0 012.92 12 9.08 9.08 0 1112 21.99zM17.1 14.37c-.3-.15-1.78-.88-2.06-.98-.28-.1-.48-.15-.68.15s-.78.98-.95 1.18c-.17.2-.34.23-.64.08-.3-.15-1.27-.47-2.42-1.49-.9-.8-1.5-1.79-1.67-2.09-.17-.3-.02-.46.13-.61.13-.13.3-.34.45-.51.15-.17.2-.28.3-.47.1-.2 0-.37-.05-.52-.05-.15-.68-1.65-.93-2.27-.24-.6-.49-.52-.68-.53l-.58-.01c-.2 0-.52.07-.79.37-.27.3-1.03 1.01-1.03 2.47 0 1.46 1.05 2.87 1.2 3.07.15.2 2.08 3.36 5.04 4.71 2.96 1.35 2.96.9 3.5.85.54-.05 1.78-.72 2.03-1.41.25-.69.25-1.28.17-1.41-.08-.13-.28-.2-.58-.35z" />
         </svg>
       </a>
-    </>
+    </footer>
   );
 };
 
