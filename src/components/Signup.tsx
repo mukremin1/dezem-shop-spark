@@ -1,8 +1,9 @@
 ﻿import React, { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function Signup() {
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -38,6 +39,12 @@ export default function Signup() {
     setMessage(null);
     setError(null);
 
+    if (!fullName || !fullName.Trim()) {
+      setError("Ad ve soyad giriniz.");
+      setLoading(false);
+      return;
+    }
+
     if (!email) {
       setError("E‑posta giriniz.");
       setLoading(false);
@@ -50,19 +57,15 @@ export default function Signup() {
     }
 
     try {
-      // Supabase v2: ikinci argüman olarak user metadata (data) gönderilebilir.
-      // Eğer kullandığınız sürüm farklıysa, gerekli değişikliği yapın.
       const { data, error: signError } = await supabase.auth.signUp(
         { email, password },
-        { data: { phone: phone || null } }
+        { data: { phone: phone || null, full_name: fullName || null } }
       );
 
       if (signError) {
         setError(signError.message);
       } else {
         setMessage("Kayıt başarılı. E‑postanızı kontrol edip onaylayın.");
-        // isteğe bağlı: profil tablosuna ek bilgi yazmak isterseniz burada yapabilirsiniz
-        // örn: await supabase.from('profiles').insert([{ id: data.user?.id, email, phone }]);
         setTimeout(() => navigate("/login"), 1400);
       }
     } catch (err: any) {
@@ -78,6 +81,22 @@ export default function Signup() {
       <p style={{ marginTop: 0, marginBottom: 12, color: "#444" }}>Hesap oluşturmak için bilgilerinizi girin.</p>
 
       <form onSubmit={handleSignup} aria-label="signup form" style={{ display: "grid", gap: 6 }}>
+        <label style={{ display: "block", fontSize: 14 }}>
+          Ad Soyad
+          <input
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            type="text"
+            required
+            aria-required
+            placeholder="Adınız Soyadınız"
+            style={inputStyle}
+            onFocus={inputFocus}
+            onBlur={inputBlur}
+            data-testid="signup-fullname"
+          />
+        </label>
+
         <label style={{ display: "block", fontSize: 14 }}>
           E‑posta
           <input
@@ -132,30 +151,29 @@ export default function Signup() {
           type="submit"
           disabled={loading}
           style={{
-            padding: "14px 18px",
-            width: "100%",
-            background: loading ? "#ffd1b3" : "#ff6a00",
+            padding: "10px 16px",
+            background: "#6366f1",
             color: "#fff",
             border: "none",
-            borderRadius: 12,
-            fontSize: 16,
-            fontWeight: 800,
+            borderRadius: 8,
+            fontSize: 15,
             cursor: loading ? "default" : "pointer",
-            opacity: loading ? 0.85 : 1,
+            opacity: loading ? 0.8 : 1,
             marginTop: 8,
-            boxShadow: "0 10px 30px rgba(255,106,0,0.18), inset 0 -2px 0 rgba(0,0,0,0.06)",
-            transition: "transform 120ms ease, box-shadow 120ms ease",
-            // Visual focus ring for keyboard users
-            outline: "none",
           }}
-          onMouseDown={undefined}
-          onMouseUp={undefined}
           aria-disabled={loading}
           data-testid="signup-submit"
         >
           {loading ? "Bekleyin..." : "Kayıt Ol"}
         </button>
       </form>
+
+      <div style={{ marginTop: 12, fontSize: 14 }}>
+        Hesabınız varsa?{" "}
+        <Link to="/login" style={{ color: "#111827", textDecoration: "underline", fontWeight: 600 }}>
+          Giriş Yap
+        </Link>
+      </div>
 
       {error && (
         <div role="alert" style={{ color: "crimson", marginTop: 12 }}>
