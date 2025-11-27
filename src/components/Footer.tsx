@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { Link } from "react-router-dom";
 
 const Footer: React.FC = () => {
@@ -6,6 +6,10 @@ const Footer: React.FC = () => {
   const supportEmail = (import.meta as any).env?.VITE_SUPPORT_EMAIL ?? "destek@dezemu.com";
   const siteUrl = (import.meta as any).env?.VITE_SITE_URL ?? "https://dezemu.com/";
   const year = new Date().getFullYear();
+
+  // Yeni iletişim bilgileri
+  const address = "Palandöken / Erzurum";
+  const phone = "+90 539 526 3293";
 
   const footerStyle: React.CSSProperties = {
     padding: 16,
@@ -24,14 +28,30 @@ const Footer: React.FC = () => {
     marginBottom: 8,
   };
 
+  const contactStyle: React.CSSProperties = {
+    marginTop: 10,
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
+    alignItems: "center",
+    color: "#374151",
+    fontSize: 14,
+  };
+
   const smallStyle: React.CSSProperties = {
-    marginTop: 8,
+    marginTop: 12,
     fontSize: 12,
     color: "#666",
   };
 
   const linkStyle: React.CSSProperties = {
     color: "inherit",
+    textDecoration: "none",
+  };
+
+  const highlightStyle: React.CSSProperties = {
+    color: "#ff6a00",
+    fontWeight: 600,
     textDecoration: "none",
   };
 
@@ -48,7 +68,7 @@ const Footer: React.FC = () => {
     whiteSpace: "nowrap",
   };
 
-  // JSON-LD organization structured data
+  // JSON-LD organization structured data (güncellendi: telefon ve adres eklendi)
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -57,16 +77,23 @@ const Footer: React.FC = () => {
     contactPoint: [
       {
         "@type": "ContactPoint",
+        telephone: phone,
         email: supportEmail,
         contactType: "customer support",
       },
     ],
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Palandöken",
+      addressLocality: "Erzurum",
+      addressCountry: "TR",
+    },
   };
 
   return (
     <footer role="contentinfo" style={footerStyle}>
       {/* Erişilebilirlik: ekran okuyucular için kısa açıklama (görünmez) */}
-      <span style={srOnly}>{`${siteName} iletişim: ${supportEmail}`}</span>
+      <span style={srOnly}>{`${siteName} iletişim: ${supportEmail}, ${phone}, ${address}`}</span>
 
       <nav aria-label="footer" style={navStyle}>
         <Link
@@ -96,6 +123,21 @@ const Footer: React.FC = () => {
           İletişim
         </a>
       </nav>
+
+      {/* Görsel iletişim bloğu — sayfanın altında net şekilde gösterilir */}
+      <div style={contactStyle} aria-label="İletişim bilgileri">
+        <div style={{ fontWeight: 700, color: "#111827" }}>{address}</div>
+        <div>
+          <a href={`tel:${phone.replace(/\s+/g, "")}`} style={highlightStyle} aria-label={`Telefon: ${phone}`}>
+            {phone}
+          </a>
+        </div>
+        <div>
+          <a href={`mailto:${supportEmail}`} style={highlightStyle} aria-label={`E-posta: ${supportEmail}`}>
+            {supportEmail}
+          </a>
+        </div>
+      </div>
 
       <div style={smallStyle}>
         © {year} {siteName} · Tüm hakları saklıdır.
