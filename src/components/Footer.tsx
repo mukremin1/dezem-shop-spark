@@ -24,6 +24,16 @@ const Footer: React.FC = () => {
     marginBottom: 8,
   };
 
+  const contactStyle: React.CSSProperties = {
+    marginTop: 8,
+    fontSize: 14,
+    color: "#333",
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
+    alignItems: "center",
+  };
+
   const smallStyle: React.CSSProperties = {
     marginTop: 8,
     fontSize: 12,
@@ -49,7 +59,7 @@ const Footer: React.FC = () => {
   };
 
   // JSON-LD organization structured data
-  const jsonLd = {
+  const jsonLd: any = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: siteName,
@@ -63,13 +73,43 @@ const Footer: React.FC = () => {
     ],
   };
 
-  // WhatsApp contact (env'den okunur). Eğer .env yoksa buton yine çalışır ama link genel wa.me/ adresine gider.
+  // Default contact info requested by you
+  const displayedPhone = "05395263293";
+  const displayedAddress = "Palandöken/Erzurum";
+
+  // Read whatsapp number from env if present, otherwise use the provided number
   const whatsappNumberRaw =
     (import.meta as any).env?.VITE_WHATSAPP_NUMBER ??
     (import.meta as any).env?.VITE_SUPPORT_PHONE ??
-    "";
-  const whatsappNumberDigits = whatsappNumberRaw.replace(/\D/g, "");
-  const whatsappLink = whatsappNumberDigits ? `https://wa.me/${whatsappNumberDigits}` : "https://wa.me/";
+    displayedPhone;
+
+  // Normalize to digits only
+  const digitsOnly = (whatsappNumberRaw || "").replace(/\D/g, "");
+
+  // Convert common local Turkish format (leading 0) to E.164 without plus for wa.me (e.g. +90 539... -> 90539...)
+  let whatsappNumberForWa = digitsOnly;
+  if (whatsappNumberForWa.startsWith("0")) {
+    // remove leading 0 and add country code 90
+    whatsappNumberForWa = "90" + whatsappNumberForWa.substring(1);
+  } else if (whatsappNumberForWa.startsWith("+")) {
+    whatsappNumberForWa = whatsappNumberForWa.replace(/^\+/, "");
+  }
+  // If it already starts with country code (e.g., 905...), keep as is.
+
+  const whatsappLink = whatsappNumberForWa ? `https://wa.me/${whatsappNumberForWa}` : "https://wa.me/";
+
+  // Add telephone to JSON-LD if we have a number
+  if (whatsappNumberForWa) {
+    jsonLd.contactPoint.push({
+      "@type": "ContactPoint",
+      telephone: `+${whatsappNumberForWa}`,
+      contactType: "customer support",
+    });
+    jsonLd.address = {
+      "@type": "PostalAddress",
+      streetAddress: displayedAddress,
+    };
+  }
 
   const whatsappButtonStyle: React.CSSProperties = {
     position: "fixed",
@@ -118,15 +158,44 @@ const Footer: React.FC = () => {
           Kullanım Şartları
         </Link>
 
+        {/* İletişim bağlantısını genişlettim: mail, telefon (WhatsApp'a yönlendirir) ve adres gösterimi */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <a
+            href={`mailto:${supportEmail}`}
+            style={linkStyle}
+            aria-label={`E-posta ile iletişim: ${supportEmail}`}
+            data-testid="footer-contact"
+          >
+            İletişim
+          </a>
+        </div>
+      </nav>
+
+      {/* Görünen iletişim bilgileri */}
+      <div style={contactStyle} aria-label="İletişim bilgileri">
+        <a
+          href={whatsappLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "inherit", textDecoration: "none", fontWeight: 500 }}
+          aria-label={`WhatsApp ile iletişim ${displayedPhone}`}
+          title={`WhatsApp: ${displayedPhone}`}
+          data-testid="footer-phone"
+        >
+          {displayedPhone}
+        </a>
+        <div aria-hidden="false" style={{ color: "#666" }}>
+          {displayedAddress}
+        </div>
         <a
           href={`mailto:${supportEmail}`}
-          style={linkStyle}
-          aria-label={`E-posta ile iletişim: ${supportEmail}`}
-          data-testid="footer-contact"
+          style={{ color: "inherit", textDecoration: "none" }}
+          aria-label={`E-posta ile iletişim ${supportEmail}`}
+          data-testid="footer-email"
         >
-          İletişim
+          {supportEmail}
         </a>
-      </nav>
+      </div>
 
       <div style={smallStyle}>
         © {year} {siteName} · Tüm hakları saklıdır.
@@ -135,13 +204,13 @@ const Footer: React.FC = () => {
       {/* JSON-LD yapılandırma (arama motorları için) */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      {/* WhatsApp floating button - erişilebilir ve yeni sekmede açar */}
+      {/* WhatsApp floating button */}
       <a
         href={whatsappLink}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label={`WhatsApp ile iletişim ${whatsappNumberRaw ? whatsappNumberRaw : ""}`}
-        title={whatsappNumberRaw ? `WhatsApp: ${whatsappNumberRaw}` : "WhatsApp"}
+        aria-label={`WhatsApp ile iletişim ${displayedPhone}`}
+        title={`WhatsApp: ${displayedPhone}`}
         data-testid="footer-whatsapp"
         style={whatsappButtonStyle}
       >
