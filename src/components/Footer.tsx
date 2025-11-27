@@ -1,7 +1,5 @@
 ﻿import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import PaymentsBar from "./PaymentsBar";
-
 const Footer: React.FC = () => {
   const siteName = (import.meta as any).env?.VITE_SITE_NAME ?? "Dezemu";
   const supportEmail = (import.meta as any).env?.VITE_SUPPORT_EMAIL ?? "destek@dezemu.com";
@@ -147,7 +145,7 @@ const Footer: React.FC = () => {
       </footer>
 
       {/* PaymentsBar ekleniyor; offsetFromBottom ile diğer sabit elemanlarla çakışma önlenebilir */}
-      <PaymentsBar offsetFromBottom={0} />
+      
 
       {/* Terms modal */}
       {termsOpen && (
@@ -210,3 +208,4 @@ const Footer: React.FC = () => {
 };
 
 export default Footer;
+
