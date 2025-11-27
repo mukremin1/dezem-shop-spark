@@ -29,17 +29,9 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
   return (
     <header className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between p-4 bg-white shadow">
       <div className="flex items-center gap-2">
-        <div>
-          <Link
-            to="/"
-            className="text-2xl font-bold text-orange-600"
-            style={{ color: "var(--color-primary, #ff6a00)" }}
-            aria-label="Dezemu ana sayfa"
-          >
-            Dezemu
-          </Link>
-          <p className="text-xs md:text-sm text-gray-600 mt-1">Kaliteyle buluşan yerel alışveriş deneyimi</p>
-        </div>
+        <Link to="/" className="text-2xl font-bold" style={{ color: "var(--color-primary, #ff6a00)" }}>
+          Dezemu
+        </Link>
       </div>
 
       {/* Mobilde tam genişlik, desktop'ta normal */}
@@ -102,7 +94,8 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
             <>
               <Link
                 to="/signup"
-                className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                className="bg-orange-600 text-white px-3 py-1 rounded text-sm hover:bg-orange-700"
+                aria-label="Kayıt Ol"
               >
                 Kayıt Ol
               </Link>
