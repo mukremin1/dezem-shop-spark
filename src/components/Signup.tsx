@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
@@ -132,16 +132,24 @@ export default function Signup() {
           type="submit"
           disabled={loading}
           style={{
-            padding: "10px 16px",
-            background: "#6366f1",
+            padding: "14px 18px",
+            width: "100%",
+            background: loading ? "#ffd1b3" : "#ff6a00",
             color: "#fff",
             border: "none",
-            borderRadius: 8,
-            fontSize: 15,
+            borderRadius: 12,
+            fontSize: 16,
+            fontWeight: 800,
             cursor: loading ? "default" : "pointer",
-            opacity: loading ? 0.8 : 1,
+            opacity: loading ? 0.85 : 1,
             marginTop: 8,
+            boxShadow: "0 10px 30px rgba(255,106,0,0.18), inset 0 -2px 0 rgba(0,0,0,0.06)",
+            transition: "transform 120ms ease, box-shadow 120ms ease",
+            // Visual focus ring for keyboard users
+            outline: "none",
           }}
+          onMouseDown={undefined}
+          onMouseUp={undefined}
           aria-disabled={loading}
           data-testid="signup-submit"
         >
