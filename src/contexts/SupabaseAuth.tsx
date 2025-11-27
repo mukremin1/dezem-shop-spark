@@ -26,8 +26,8 @@ export const SupabaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
       } else {
         localStorage.removeItem("supabase_session");
       }
-    } catch (e) {
-      // ignore
+    } catch {
+      // ignore storage errors
     }
   };
 
@@ -49,15 +49,31 @@ export const SupabaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const refreshSession = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase.auth.getSession();
-      if (!error && data?.session) {
-        setSession(data.session);
-        setUser(data.session.user ?? null);
-        persist(data.session);
+      const getter = (supabase as any)?.auth?.getSession ?? (supabase as any).getSession;
+      if (typeof getter === "function") {
+        const res = await getter.call((supabase as any).auth ?? supabase);
+        const data = res?.data ?? res;
+        const s = data?.session ?? data;
+        if (s) {
+          setSession(s);
+          setUser(s.user ?? null);
+          persist(s);
+        } else {
+          setSession(null);
+          setUser(null);
+          persist(null);
+        }
       } else {
-        setSession(null);
-        setUser(null);
-        persist(null);
+        const maybeSession = (supabase as any)?.auth?.session?.() ?? null;
+        if (maybeSession) {
+          setSession(maybeSession);
+          setUser(maybeSession.user ?? null);
+          persist(maybeSession);
+        } else {
+          setSession(null);
+          setUser(null);
+          persist(null);
+        }
       }
     } catch {
       setSession(null);
@@ -74,62 +90,60 @@ export const SupabaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setLoading(false);
     } else {
       (async () => {
-        try {
-          const { data, error } = await supabase.auth.getSession();
-          if (!error && data?.session) {
-            setSession(data.session);
-            setUser(data.session.user ?? null);
-            persist(data.session);
+        await refreshSession();
+      })();
+    }
+
+    let unsubscribe: (() => void) | undefined;
+
+    try {
+      const onAuth = (supabase as any)?.auth?.onAuthStateChange ?? (supabase as any).onAuthStateChange;
+      if (typeof onAuth === "function") {
+        const ret = onAuth.call((supabase as any).auth ?? supabase, (_event: any, payload: any) => {
+          const s = payload?.session ?? payload;
+          if (s) {
+            setSession(s);
+            setUser(s.user ?? null);
+            persist(s);
           } else {
             setSession(null);
             setUser(null);
             persist(null);
           }
-        } catch {
-          setSession(null);
-          setUser(null);
-          persist(null);
-        } finally {
-          setLoading(false);
-        }
-      })();
-    }
+        });
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      try {
-        const s = (newSession && newSession.session) ? newSession.session : newSession;
-        if (s) {
-          setSession(s);
-          setUser(s.user ?? null);
-          persist(s);
-        } else {
-          setSession(null);
-          setUser(null);
-          persist(null);
+        if (ret) {
+          const sub = ret.data?.subscription ?? ret.subscription ?? ret;
+          if (sub && typeof sub.unsubscribe === "function") {
+            unsubscribe = () => sub.unsubscribe();
+          } else if (typeof (ret as any).unsubscribe === "function") {
+            unsubscribe = () => (ret as any).unsubscribe();
+          } else if (typeof ret === "function") {
+            unsubscribe = ret as () => void;
+          }
         }
-      } catch {
-        setSession(null);
-        setUser(null);
-        persist(null);
+      } else {
+        Write-Output "[SupabaseAuth] onAuthStateChange not available on supabase client; skipping subscription."
       }
-    }) ?? {};
+    } catch {
+      Write-Output "[SupabaseAuth] subscription setup failed"
+    }
 
     return () => {
       try {
-        if (listener && typeof listener.subscription?.unsubscribe === "function") {
-          listener.subscription.unsubscribe();
-        } else if (listener && typeof (listener as any).unsubscribe === "function") {
-          (listener as any).unsubscribe();
-        }
+        if (unsubscribe) unsubscribe();
       } catch {
-        // ignore
+        # ignore
       }
     };
   }, []);
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      const signOutFn = (supabase as any)?.auth?.signOut ?? (supabase as any).signOut;
+      if (typeof signOutFn === "function") {
+        await signOutFn.call((supabase as any).auth ?? supabase);
+      }
     } catch {
       // ignore
     } finally {
