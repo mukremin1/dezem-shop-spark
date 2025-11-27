@@ -63,7 +63,7 @@ const Footer: React.FC = () => {
     ],
   };
 
-  // WhatsApp contact (read from env). Accepts values like "+905551234567", "905551234567", "55 512 345 67" etc.
+  // WhatsApp contact (env'den okunur). Eğer .env yoksa buton yine çalışır ama link genel wa.me/ adresine gider.
   const whatsappNumberRaw =
     (import.meta as any).env?.VITE_WHATSAPP_NUMBER ??
     (import.meta as any).env?.VITE_SUPPORT_PHONE ??
@@ -135,7 +135,7 @@ const Footer: React.FC = () => {
       {/* JSON-LD yapılandırma (arama motorları için) */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      {/* WhatsApp floating button */}
+      {/* WhatsApp floating button - erişilebilir ve yeni sekmede açar */}
       <a
         href={whatsappLink}
         target="_blank"
