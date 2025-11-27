@@ -1,7 +1,7 @@
-import React from "react";
+﻿import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import SearchInput from "./SearchInput";
-import { MessageCircle, Mail } from "lucide-react";
+import { MessageCircle, Mail, ShoppingCart } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -27,7 +27,7 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
   }
 
   return (
-    <header className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between p-4 bg-white shadow">
+    <header className="relative flex flex-col gap-3 md:flex-row md:items-center md:justify-between p-4 bg-white shadow">
       <div className="flex items-center gap-2">
         <Link to="/" className="text-2xl font-bold" style={{ color: "var(--color-primary, #ff6a00)" }}>
           Dezemu
@@ -105,6 +105,16 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
           )}
         </nav>
       </div>
+
+      {/* Sepet ikonu: mobilde üst sağ köşede absolute, desktop'ta normal flow içinde sağa hizalanmış */}
+      <Link
+        to="/cart"
+        aria-label="Sepetim"
+        title="Sepetim"
+        className="absolute right-4 top-4 md:static md:ml-4 hover:text-blue-600 flex items-center"
+      >
+        <ShoppingCart className="h-5 w-5" />
+      </Link>
     </header>
   );
 };
