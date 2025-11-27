@@ -14,8 +14,8 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
   const { user, loading } = useUser();
   const navigate = useNavigate();
 
-  const [menuOpen, setMenuOpen] = useState(false); // mobile menu
-  const [settingsOpen, setSettingsOpen] = useState(false); // shared for desktop/mobile settings
+  const [menuOpen, setMenuOpen] = useState(false); // mobile menu open
+  const [settingsOpen, setSettingsOpen] = useState(false); // collapsible settings inside menu
   const menuRef = useRef<HTMLDivElement | null>(null);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
 
@@ -24,14 +24,12 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
       await supabase.auth.signOut();
     } catch (err) {
       // ignore error but still try to redirect/refresh
-      // console.warn("Logout error", err);
     }
-    // navigate to home and reload to ensure client state is cleared
     navigate("/");
     setTimeout(() => window.location.reload(), 120);
   }
 
-  // close on escape
+  // close menus on Escape
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") {
@@ -43,7 +41,7 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  // click outside closes mobile menu
+  // click outside to close mobile menu
   useEffect(() => {
     function onClick(e: MouseEvent) {
       if (!menuOpen) return;
@@ -79,17 +77,16 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
           className="w-full md:w-64"
         />
 
+        {/* Desktop nav */}
         <nav className="hidden md:flex gap-4 text-sm md:text-base items-center">
           <Link to="/" className="hover:text-blue-600">
             Anasayfa
           </Link>
 
-          {/* Siparişlerim linki herkes görebilir; istek olursa görünürlüğünü user ile kontrol ederiz */}
           <Link to="/orders" className="hover:text-blue-600">
             Siparişlerim
           </Link>
 
-          {/* WhatsApp / Email ikonları */}
           <a
             href="https://wa.me/905395263293?text=Merhaba%20Dezemu"
             target="_blank"
@@ -107,7 +104,6 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
             <Mail className="h-4 w-4" />
           </a>
 
-          {/* Auth controls (desktop) */}
           {loading ? (
             <span className="text-gray-500 ml-2">Yükleniyor...</span>
           ) : user ? (
@@ -118,7 +114,6 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
               <Link to="/profile" className="hover:text-blue-600">
                 Profil
               </Link>
-
               <Link to="/addresses" className="hover:text-blue-600">
                 Adreslerim
               </Link>
@@ -171,7 +166,7 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
           )}
         </nav>
 
-        {/* Mobile hamburger button (keeps Header.tsx structure but adds inline mobile menu) */}
+        {/* Mobile hamburger button */}
         <div className="md:hidden flex items-center">
           <button
             ref={buttonRef}
@@ -190,7 +185,7 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
           </button>
         </div>
 
-        {/* Mobile menu panel (inline inside Header) */}
+        {/* Mobile menu inline under hamburger (inside same Header.tsx) */}
         {menuOpen && (
           <div
             ref={menuRef}
@@ -208,18 +203,17 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
                 Siparişlerim
               </Link>
 
-              <div className="flex items-center gap-2">
-                <a
-                  href="https://wa.me/905395263293?text=Merhaba%20Dezemu"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2"
-                >
-                  <MessageCircle className="h-4 w-4" /> WhatsApp
-                </a>
-              </div>
+              <a
+                href="https://wa.me/905395263293?text=Merhaba%20Dezemu"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 py-2"
+                onClick={() => setMenuOpen(false)}
+              >
+                <MessageCircle className="h-4 w-4" /> WhatsApp
+              </a>
 
-              <a href="mailto:destek@dezemu.com" className="block py-2">
+              <a href="mailto:destek@dezemu.com" className="block py-2" onClick={() => setMenuOpen(false)}>
                 destek@dezemu.com
               </a>
 
@@ -237,7 +231,7 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
                     Adreslerim
                   </Link>
 
-                  {/* Settings collapsible */}
+                  {/* Settings collapsible inside mobile menu */}
                   <div>
                     <button
                       onClick={() => setSettingsOpen((s) => !s)}
