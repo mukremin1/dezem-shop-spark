@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import PaymentsBar from "./PaymentsBar";
 
 const Footer: React.FC = () => {
   const siteName = (import.meta as any).env?.VITE_SITE_NAME ?? "Dezemu";
@@ -128,8 +129,10 @@ const Footer: React.FC = () => {
       // prevent background scrolling
       const prevOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
-      return () => {
-        document.removeEventListener("keydown", onKey);
+      return (
+  <>) => {
+        document.removeEventListener("keydown", onKey
+  </>);
         document.body.style.overflow = prevOverflow;
         previousActiveElementRef.current?.focus();
       };
@@ -357,3 +360,4 @@ const Footer: React.FC = () => {
 };
 
 export default Footer;
+

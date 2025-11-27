@@ -3,13 +3,11 @@ import PaymentIcons from "./PaymentIcons";
 
 /**
  * PaymentsBar
- * - Separate component so Footer.tsx remains unchanged.
  * - Renders a fixed bottom bar with Mastercard, Visa, Troy icons.
- * - Import and render this component in your main layout or App.tsx.
+ * - If you have a floating WhatsApp button, adjust offsetFromBottom to avoid overlap.
  */
 
 const PaymentsBar: React.FC<{ offsetFromBottom?: number }> = ({ offsetFromBottom = 0 }) => {
-  // offsetFromBottom lets you leave space for other fixed elements (e.g. WhatsApp button)
   return (
     <div
       aria-hidden="true"
