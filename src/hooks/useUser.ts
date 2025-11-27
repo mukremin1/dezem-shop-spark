@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export function useUser() {
@@ -7,6 +7,7 @@ export function useUser() {
 
   useEffect(() => {
     let mounted = true;
+    let cleanupFn: (() => void) | undefined;
 
     async function load() {
       try {
@@ -22,13 +23,49 @@ export function useUser() {
     }
     load();
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
+    // Guard: onAuthStateChange fonksiyonu mevcutsa kullan, değilse atla
+    try {
+      if (supabase?.auth && typeof supabase.auth.onAuthStateChange === "function") {
+        const resp = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+          if (!mounted) return;
+          setUser(session?.user ?? null);
+        });
+
+        // Supabase farklı sürümlerde farklı dönüş yapabilir:
+        // - { data: { subscription } }
+        // - { subscription }
+        // - veya doğrudan bir unsubscribe fonksiyonu / cleanup fonksiyonu
+        const subLike: any = resp?.data ?? resp ?? null;
+
+        cleanupFn = () => {
+          try {
+            if (!subLike) return;
+            // farklı yapıları destekle
+            subLike.subscription?.unsubscribe?.();
+            subLike.unsubscribe?.();
+            if (typeof resp === "function") {
+              // bazı implementasyonlar direkt fonksiyon dönebilir
+              resp();
+            }
+          } catch {
+            // ignore
+          }
+        };
+      } else {
+        // onAuthStateChange yoksa sessiyon yönetimi farklı bir yerde olabilir.
+        // Bu durumda getUser çağrısı ile başlangıç durumu belirlendi.
+      }
+    } catch {
+      // herhangi bir hata burada yutulsun, hook kırılmasın
+    }
 
     return () => {
       mounted = false;
-      sub.subscription?.unsubscribe?.();
+      try {
+        cleanupFn?.();
+      } catch {
+        // ignore
+      }
     };
   }, []);
 
