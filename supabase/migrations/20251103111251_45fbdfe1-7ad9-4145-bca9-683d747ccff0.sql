@@ -1,4 +1,4 @@
--- Admin kullanıcıların ürün ve resim eklemesine izin ver
+﻿-- Admin kullanıcıların ürün ve resim eklemesine izin ver
 CREATE POLICY "Admins can insert products"
 ON public.products
 FOR INSERT

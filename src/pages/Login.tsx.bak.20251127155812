@@ -1,0 +1,155 @@
+﻿import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import "@/styles/trendyol-theme.css";
+import "@/styles/login.css";
+
+export default function Login() {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [messageType, setMessageType] = useState<"error" | "info" | null>(null);
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setMessage(null);
+    setMessageType(null);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        setMessage(error.message);
+        setMessageType("error");
+      } else if (data?.user) {
+        setMessage("Giriş başarılı. Yönlendiriliyorsunuz...");
+        setMessageType("info");
+        setTimeout(() => navigate("/"), 500);
+      } else {
+        setMessage("Giriş isteği işlendi. Lütfen e-posta kutunuzu kontrol edin.");
+        setMessageType("info");
+      }
+    } catch (err: any) {
+      setMessage(err?.message || "Giriş sırasında hata oluştu.");
+      setMessageType("error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleResetPassword() {
+    setMessage(null);
+    setMessageType(null);
+    if (!email) {
+      setMessage("Şifrenizi sıfırlamak için lütfen önce e-posta adresinizi girin.");
+      setMessageType("error");
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + "/reset-success",
+      });
+      if (error) {
+        setMessage(error.message || "Şifre sıfırlama isteği gönderilemedi.");
+        setMessageType("error");
+      } else {
+        setMessage("Şifre sıfırlama e-postası gönderildi. Gelen kutunuzu kontrol edin.");
+        setMessageType("info");
+      }
+    } catch (err: any) {
+      setMessage(err?.message || "İşlem sırasında hata oluştu.");
+      setMessageType("error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <main className="auth-page" role="main" aria-labelledby="login-title">
+      <div className="auth-card" role="region" aria-label="Giriş Formu">
+        <header className="auth-header">
+          <h1 id="login-title" className="auth-title">Hesabınıza Giriş Yapın</h1>
+          <p className="auth-sub">E-posta ve parolanızla hızlıca giriş yapın.</p>
+        </header>
+
+        <form className="auth-form" onSubmit={handleLogin} noValidate>
+          {message && (
+            <div
+              className={
+                messageType === "error" ? "auth-alert auth-alert-error" : "auth-alert auth-alert-info"
+              }
+              role="status"
+              aria-live="polite"
+            >
+              {message}
+            </div>
+          )}
+
+          <label className="form-row">
+            <span className="label">E-posta</span>
+            <input
+              className="input"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="ornek@eposta.com"
+              aria-label="E-posta"
+              autoComplete="email"
+            />
+          </label>
+
+          <label className="form-row">
+            <div className="label-row">
+              <span className="label">Parola</span>
+              <button
+                type="button"
+                className="btn btn-link small"
+                onClick={handleResetPassword}
+                aria-label="Şifremi unuttum"
+                title="Şifremi unuttum"
+              >
+                Şifremi unuttum
+              </button>
+            </div>
+            <input
+              className="input"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Parolanız"
+              aria-label="Parola"
+              autoComplete="current-password"
+            />
+          </label>
+
+          <div className="form-actions">
+            <button
+              type="submit"
+              className="btn btn-primary btn-lg"
+              disabled={loading}
+              aria-disabled={loading}
+            >
+              {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
+            </button>
+
+            <Link to="/register" className="btn btn-outline btn-lg link-register" aria-label="Kayıt Ol">
+              Kayıt Ol
+            </Link>
+          </div>
+        </form>
+
+        <footer className="auth-footer">
+          <p className="foot-note">
+            Henüz hesabınız yok mu? <Link to="/register">Kayıt olun</Link> veya destek için bize
+            ulaşın.
+          </p>
+        </footer>
+      </div>
+    </main>
+  );
+}

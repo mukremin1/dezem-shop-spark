@@ -1,4 +1,4 @@
--- Create profiles table for user information
+﻿-- Create profiles table for user information
 CREATE TABLE public.profiles (
   id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   full_name TEXT,

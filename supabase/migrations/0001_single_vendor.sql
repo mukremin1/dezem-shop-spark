@@ -1,4 +1,4 @@
--- 0001_single_vendor.sql
+﻿-- 0001_single_vendor.sql
 -- Create sellers table if not exists
 CREATE TABLE IF NOT EXISTS public.sellers (
   id text PRIMARY KEY,

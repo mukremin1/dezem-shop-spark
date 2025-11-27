@@ -1,0 +1,117 @@
+﻿import React, { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+
+export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [messageType, setMessageType] = useState<"error" | "success" | "info" | null>(null);
+  const navigate = useNavigate();
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setMessage(null);
+    setMessageType(null);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        setMessage(error.message);
+        setMessageType("error");
+      } else {
+        setMessage("Giriş başarılı.");
+        setMessageType("success");
+        // Redirect to dashboard or home
+        setTimeout(() => navigate("/dashboard"), 400);
+      }
+    } catch (err: any) {
+      setMessage(err.message || "Giriş sırasında hata oluştu.");
+      setMessageType("error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center p-6">
+      <div
+        role="region"
+        aria-label="Giriş formu"
+        className="w-full max-w-md bg-white rounded-lg shadow-lg overflow-hidden"
+        style={{ borderTop: "4px solid #ff6a00" }}
+      >
+        <div className="p-6">
+          <h2 className="text-2xl font-semibold mb-2" style={{ color: "#333" }}>
+            Giriş Yap
+          </h2>
+          <p className="text-sm text-gray-600 mb-4">Hesabınıza giriş yapmak için e‑posta ve şifrenizi girin.</p>
+
+          <form onSubmit={handleLogin} className="space-y-4" aria-label="login form">
+            <label className="block text-sm">
+              <span className="text-gray-700">E‑posta</span>
+              <input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                type="email"
+                required
+                placeholder="you@example.com"
+                className="mt-1 block w-full rounded-md border border-gray-200 px-3 py-2 text-sm
+                  placeholder-gray-400
+                  focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200
+                  transition-shadow"
+                aria-required="true"
+              />
+            </label>
+
+            <label className="block text-sm">
+              <span className="text-gray-700">Şifre</span>
+              <input
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                type="password"
+                required
+                placeholder="••••••••"
+                className="mt-1 block w-full rounded-md border border-gray-200 px-3 py-2 text-sm
+                  placeholder-gray-400
+                  focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200
+                  transition-shadow"
+                aria-required="true"
+              />
+            </label>
+
+            <button
+              type="submit"
+              disabled={loading}
+              aria-busy={loading}
+              className={`w-full inline-flex items-center justify-center px-4 py-2 rounded-md text-white font-medium
+                ${loading ? "bg-orange-300 cursor-not-allowed" : "bg-[#ff6a00] hover:bg-[#ff7f21]"} 
+                focus:outline-none focus:ring-2 focus:ring-orange-300`}
+            >
+              {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
+            </button>
+          </form>
+
+          {message && (
+            <p
+              className={`mt-4 text-sm ${
+                messageType === "success" ? "text-amber-800 bg-amber-50 p-2 rounded" : ""
+              } ${messageType === "error" ? "text-red-700 bg-red-50 p-2 rounded" : ""}`}
+              role={messageType === "error" ? "alert" : "status"}
+            >
+              {message}
+            </p>
+          )}
+        </div>
+
+        <div className="bg-[#fff6ef] px-6 py-3 text-xs text-[#7a3f00] border-t border-gray-100">
+          <span>Hesabınız yok mu? </span>
+          <a href="/signup" className="font-medium underline" style={{ color: "#ff6a00" }}>
+            Kayıt Ol
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}

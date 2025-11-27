@@ -1,4 +1,4 @@
--- Ürün varyantları için tablo oluştur
+﻿-- Ürün varyantları için tablo oluştur
 CREATE TABLE IF NOT EXISTS public.product_variants (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,

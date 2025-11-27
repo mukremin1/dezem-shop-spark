@@ -1,4 +1,4 @@
--- Add address and contact information to profiles table
+﻿-- Add address and contact information to profiles table
 ALTER TABLE public.profiles 
 ADD COLUMN IF NOT EXISTS address TEXT,
 ADD COLUMN IF NOT EXISTS city TEXT,

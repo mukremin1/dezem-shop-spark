@@ -1,4 +1,4 @@
--- Fix 1: Restrict profiles table to only allow users to view their own data
+﻿-- Fix 1: Restrict profiles table to only allow users to view their own data
 DROP POLICY IF EXISTS "Profiles are viewable by everyone" ON profiles;
 
 CREATE POLICY "Users can view own profile" ON profiles
