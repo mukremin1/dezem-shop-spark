@@ -2,10 +2,10 @@
 import { supabase } from "@/integrations/supabase/client";
 
 /**
- * useUser - safe hook that works with different @supabase/supabase-js shapes
- * - tries getSession (v2) then falls back to getUser
- * - only subscribes if onAuthStateChange exists
- * - tolerates different subscription return shapes and cleans up safely
+ * Robust useUser hook
+ * - Compatible with @supabase/supabase-js v2 and older shapes.
+ * - Uses feature-detection for getUser/getSession and onAuthStateChange.
+ * - Cleans up unsubscribe correctly for multiple return shapes.
  */
 export function useUser() {
   const [user, setUser] = useState<any | null>(null);
@@ -13,26 +13,42 @@ export function useUser() {
 
   useEffect(() => {
     let mounted = true;
-    let unsubscribeFn: (() => void) | undefined;
 
     async function load() {
       try {
-        if (typeof supabase?.auth?.getSession === "function") {
-          const res = await supabase.auth.getSession();
+        // Prefer v2: auth.getUser() -> { data: { user } }
+        const getUserFn = (supabase as any)?.auth?.getUser ?? (supabase as any).getUser;
+        if (typeof getUserFn === "function") {
+          const res = await getUserFn.call((supabase as any).auth ?? supabase);
+          const data = res?.data ?? res;
+          const u = data?.user ?? data ?? null;
           if (!mounted) return;
-          setUser(res?.data?.session?.user ?? null);
-        } else if (typeof supabase?.auth?.getUser === "function") {
-          const res = await supabase.auth.getUser();
-          if (!mounted) return;
-          setUser(res?.data?.user ?? null);
-        } else {
-          // auth API not available (stub); set null and continue
-          console.warn("supabase.auth API not available; running in stub/no-auth mode.");
-          setUser(null);
+          setUser(u ?? null);
+          return;
         }
-      } catch (err) {
-        console.error("Failed to get session/user from supabase:", err);
+
+        // Fallback: getSession() -> { data: { session } }
+        const getSessionFn = (supabase as any)?.auth?.getSession ?? (supabase as any).getSession;
+        if (typeof getSessionFn === "function") {
+          const res = await getSessionFn.call((supabase as any).auth ?? supabase);
+          const data = res?.data ?? res;
+          const session = data?.session ?? data ?? null;
+          if (!mounted) return;
+          setUser(session?.user ?? null);
+          return;
+        }
+
+        // Older SDKs: supabase.auth.user() or supabase.auth.session()
+        const maybeUser =
+          (supabase as any)?.auth?.user?.() ??
+          (supabase as any)?.auth?.session?.()?.user ??
+          null;
         if (!mounted) return;
+        setUser(maybeUser ?? null);
+      } catch (err) {
+        if (!mounted) return;
+        // eslint-disable-next-line no-console
+        console.warn("useUser: initial load error", err);
         setUser(null);
       } finally {
         if (mounted) setLoading(false);
@@ -41,49 +57,57 @@ export function useUser() {
 
     load();
 
-    // Subscribe to auth changes only if supported
+    // Subscribe to auth changes defensively
+    let unsubscribe: (() => void) | undefined;
+
     try {
-      const onAuth = (supabase as any)?.auth?.onAuthStateChange;
+      const onAuth =
+        (supabase as any)?.auth?.onAuthStateChange ??
+        (supabase as any).onAuthStateChange;
+
       if (typeof onAuth === "function") {
-        const ret = onAuth((_event: string, session: any) => {
-          if (!mounted) return;
-          setUser(session?.user ?? null);
+        const receiver = (supabase as any).auth ?? supabase;
+        const ret = onAuth.call(receiver, (_event: any, payloadOrSession: any) => {
+          try {
+            const s = payloadOrSession?.session ?? payloadOrSession;
+            const u = s?.user ?? null;
+            setUser(u);
+          } catch (e) {
+            // eslint-disable-next-line no-console
+            console.warn("useUser: subscription handler error", e);
+          }
         });
 
-        // ret may be: { data: { subscription } } (v2)
-        // or { subscription } or { unsubscribe } or simply a function
-        const subscription =
-          (ret && ret.data && ret.data.subscription) ||
-          (ret && (ret.subscription || ret.unsubscribe)) ||
-          ret;
-
-        if (subscription) {
-          // subscription might be an object with unsubscribe(), or might be a function to call to unsubscribe
-          if (typeof subscription.unsubscribe === "function") {
-            unsubscribeFn = () => subscription.unsubscribe();
-          } else if (typeof subscription === "function") {
-            unsubscribeFn = () => subscription();
+        if (ret) {
+          const sub = (ret as any).data?.subscription ?? (ret as any).subscription ?? ret;
+          if (sub && typeof (sub as any).unsubscribe === "function") {
+            unsubscribe = () => (sub as any).unsubscribe();
+          } else if (typeof (ret as any).unsubscribe === "function") {
+            unsubscribe = () => (ret as any).unsubscribe();
           } else if (typeof ret === "function") {
-            // fallback: ret itself might be unsubscribe function
-            unsubscribeFn = () => (ret as Function)();
+            unsubscribe = ret as () => void;
           } else {
-            // unknown shape — no-op
-            unsubscribeFn = undefined;
+            unsubscribe = undefined;
           }
         }
+      } else {
+        // eslint-disable-next-line no-console
+        console.warn("useUser: onAuthStateChange not available on supabase client; skipping subscription.");
       }
     } catch (err) {
-      console.warn("Failed to subscribe to auth changes or unsupported API shape:", err);
+      // eslint-disable-next-line no-console
+      console.warn("useUser: Failed to subscribe to auth changes or unsupported API shape:", err);
     }
 
     return () => {
       mounted = false;
       try {
-        if (unsubscribeFn) unsubscribeFn();
-      } catch (e) {
-        // ignore cleanup errors
+        if (unsubscribe) unsubscribe();
+      } catch {
+        // ignore unsubscribe errors
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { user, loading };
