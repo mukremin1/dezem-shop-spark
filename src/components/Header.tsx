@@ -1,7 +1,7 @@
 ﻿import React, { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import SearchInput from "./SearchInput";
-import { MessageCircle, Mail } from "lucide-react";
+import { MessageCircle, Mail, Plus } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -10,9 +10,12 @@ interface HeaderProps {
   setSearchQuery: (q: string) => void;
 }
 
+const ADMIN_EMAIL = "mukremin.cakmak.da@gmail.com";
+
 const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
   const { user, loading } = useUser();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
@@ -35,6 +38,7 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
     setTimeout(() => window.location.reload(), 120);
   }
 
+  // Load profile and latest address for the small header panel
   useEffect(() => {
     let mounted = true;
     async function loadProfile() {
@@ -46,6 +50,7 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
       try {
         let name: string | null = null;
         let phone: string | null = null;
+
         try {
           const { data: profileData, error: profileError } = await supabase
             .from("profiles")
@@ -63,13 +68,14 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
         try {
           const metaName = (user as any)?.user_metadata?.full_name ?? (user as any)?.user_metadata?.name ?? null;
           if (!name && metaName) name = metaName;
+          if (!phone && (user as any)?.user_metadata?.phone) phone = (user as any).user_metadata.phone;
         } catch {}
 
         let addressText: string | null = null;
         try {
           const { data: addrData, error: addrError } = await supabase
             .from("addresses")
-            .select("label, street, city, postal_code, country, phone")
+            .select("label,street,city,postal_code,country,phone")
             .eq("user_id", user.id)
             .order("created_at", { ascending: false })
             .limit(1)
@@ -98,12 +104,12 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
     }
 
     loadProfile();
-
     return () => {
       mounted = false;
     };
   }, [user]);
 
+  // Close profile panel on outside click / Escape
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") setProfileOpen(false);
@@ -127,6 +133,11 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
       document.removeEventListener("mousedown", onClick);
     };
   }, [profileOpen]);
+
+  const isAdminUser =
+    !!user &&
+    (user.email === ADMIN_EMAIL ||
+      (user.user_metadata && ((user.user_metadata as any).email === ADMIN_EMAIL || (user.user_metadata as any).full_name === ADMIN_EMAIL)));
 
   return (
     <header className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between p-4 bg-white shadow">
@@ -177,6 +188,17 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery }) => {
               <Link to="/dashboard" className="hover:text-blue-600">
                 Dashboard
               </Link>
+
+              {isAdminUser && location.pathname === "/" && (
+                <Link
+                  to="/add-product"
+                  title="Ürün Ekle"
+                  className="ml-2 inline-flex items-center justify-center w-9 h-9 rounded-full bg-primary text-white hover:bg-primary/90"
+                  aria-label="Ürün Ekle"
+                >
+                  <Plus className="w-5 h-5" />
+                </Link>
+              )}
 
               <div className="relative">
                 <button
