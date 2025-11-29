@@ -85,10 +85,35 @@ export default function AdminCreateProduct() {
     }
 
     const parsedPrice = parseFloat(price);
-    if (isNaN(parsedPrice) || parsedPrice < 0) {
+    if (isNaN(parsedPrice) || parsedPrice <= 0) {
       toast({
         title: "Hata",
-        description: "Geçerli bir fiyat girin.",
+        description: "Geçerli bir fiyat girin (0'dan büyük olmalı).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate compare_price if provided
+    let parsedComparePrice: number | null = null;
+    if (comparePrice.trim()) {
+      parsedComparePrice = parseFloat(comparePrice);
+      if (isNaN(parsedComparePrice) || parsedComparePrice < 0) {
+        toast({
+          title: "Hata",
+          description: "Geçerli bir karşılaştırma fiyatı girin.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    // Validate stock quantity
+    const parsedStockQuantity = parseInt(stockQuantity);
+    if (isNaN(parsedStockQuantity) || parsedStockQuantity < 0) {
+      toast({
+        title: "Hata",
+        description: "Geçerli bir stok miktarı girin.",
         variant: "destructive",
       });
       return;
@@ -106,8 +131,8 @@ export default function AdminCreateProduct() {
           name: name.trim(),
           slug,
           price: parsedPrice,
-          compare_price: comparePrice ? parseFloat(comparePrice) : null,
-          stock_quantity: parseInt(stockQuantity) || 0,
+          compare_price: parsedComparePrice,
+          stock_quantity: parsedStockQuantity,
           category_id: categoryId || null,
           description: description.trim() || null,
           short_description: shortDescription.trim() || null,
