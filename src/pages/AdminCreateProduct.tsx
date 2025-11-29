@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
   Switch,
-} from "@/components/ui"; // Gerekirse projedeki gerçek import yoluna göre düzeltin
+} from "@/components/ui";
 
 function makeSlug(name: string) {
   return name
@@ -62,7 +62,7 @@ export default function AdminCreateProduct() {
     setIsSubmitting(true);
 
     if (!name || !price) {
-      toast({ title: "Hata", description: "sim ve fiyat gerekli.", variant: "destructive" });
+      toast({ title: "Hata", description: "İsim ve fiyat gerekli.", variant: "destructive" });
       setIsSubmitting(false);
       return;
     }
