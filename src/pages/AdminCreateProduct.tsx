@@ -63,15 +63,20 @@ const AdminCreateProduct = () => {
     image_url: "",
   });
 
-  const { data: categories = [] } = useQuery({
+  interface Category {
+    id: string;
+    name: string;
+  }
+
+  const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["categories"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("categories")
-        .select("*")
+        .select("id, name")
         .order("name");
       if (error) throw error;
-      return data;
+      return data ?? [];
     },
   });
 
@@ -117,13 +122,15 @@ const AdminCreateProduct = () => {
     try {
       const slug = generateSlug(formData.name);
 
+      const comparePrice = formData.compare_price
+        ? parseFloat(formData.compare_price)
+        : null;
+
       const productData = {
         name: formData.name.trim(),
         slug,
         price,
-        compare_price: formData.compare_price
-          ? parseFloat(formData.compare_price)
-          : null,
+        compare_price: comparePrice !== null && !isNaN(comparePrice) ? comparePrice : null,
         stock_quantity: parseInt(formData.stock_quantity) || 0,
         category_id: formData.category_id || null,
         description: formData.description.trim() || null,

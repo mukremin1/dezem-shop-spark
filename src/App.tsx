@@ -33,7 +33,11 @@ export const App = () => {
             </ProtectedRoute>
           }
         />
-        <Route path="/admin/products/new" element={<AdminCreateProduct />} />
+        <Route path="/admin/products/new" element={
+          <ProtectedRoute>
+            <AdminCreateProduct />
+          </ProtectedRoute>
+        } />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />
