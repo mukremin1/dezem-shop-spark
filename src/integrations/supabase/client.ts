@@ -40,12 +40,29 @@ const stub = {
     getUser: async () => ({ data: { user: null }, error: null }),
     signInWithPassword: async () => ({ data: null, error: new Error("Supabase yapılandırılmadı") }),
     signOut: async () => ({ error: new Error("Supabase yapılandırılmadı") }),
+    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
   },
   from: (table: string) => ({
-    select: async (..._args: any[]) => { throw new Error(`Supabase yapılandırılmadı. Table: ${table}`); },
-    insert: async (..._args: any[]) => { throw new Error(`Supabase yapılandırılmadı. Table: ${table}`); },
-    update: async (..._args: any[]) => { throw new Error(`Supabase yapılandırılmadı. Table: ${table}`); },
-    delete: async (..._args: any[]) => { throw new Error(`Supabase yapılandırılmadı. Table: ${table}`); },
+    select: (..._args: any[]) => ({
+      order: () => ({
+        then: (resolve: (value: { data: any[]; error: null }) => void) => resolve({ data: [], error: null }),
+      }),
+      eq: () => ({
+        single: async () => ({ data: null, error: null }),
+        maybeSingle: async () => ({ data: null, error: null }),
+        then: (resolve: (value: { data: any[]; error: null }) => void) => resolve({ data: [], error: null }),
+      }),
+      single: async () => ({ data: null, error: null }),
+      then: (resolve: (value: { data: any[]; error: null }) => void) => resolve({ data: [], error: null }),
+    }),
+    insert: (..._args: any[]) => ({
+      select: () => ({
+        single: async () => ({ data: null, error: new Error("Supabase yapılandırılmadı") }),
+        maybeSingle: async () => ({ data: null, error: new Error("Supabase yapılandırılmadı") }),
+      }),
+    }),
+    update: async (..._args: any[]) => ({ data: null, error: new Error("Supabase yapılandırılmadı") }),
+    delete: async (..._args: any[]) => ({ data: null, error: new Error("Supabase yapılandırılmadı") }),
   }),
 } as unknown as ReturnType<typeof createClient>;
 

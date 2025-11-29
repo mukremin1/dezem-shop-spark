@@ -10,6 +10,7 @@ import Login from "@/components/Login";
 import Dashboard from "@/pages/Dashboard";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import SssPage from "@/pages/Sss";
+import AdminCreateProduct from "@/pages/AdminCreateProduct";
 
 const rawBase = (import.meta as any).env?.BASE_URL ?? "/";
 const basename = rawBase === "/" ? "/" : rawBase.replace(/\/$/, "");
@@ -32,6 +33,11 @@ export const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="/admin/products/new" element={
+          <ProtectedRoute>
+            <AdminCreateProduct />
+          </ProtectedRoute>
+        } />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />
