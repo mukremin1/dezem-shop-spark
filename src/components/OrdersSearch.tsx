@@ -71,4 +71,22 @@ export default function OrdersSearch({ userId }: { userId?: string }) {
         className="input"
       />
 
-      {loading && <div className
+      {loading && <div className="muted">Yükleniyor…</div>}
+      {error && <div className="error">{error}</div>}
+
+      <ul className="orders-list">
+        {orders.map((o) => (
+          <li key={o.id}>
+            <strong>{o.order_no ?? o.id}</strong>
+            {o.customer_name ? ` — ${o.customer_name}` : ""}
+            {o.status ? ` (${o.status})` : ""}
+          </li>
+        ))}
+      </ul>
+
+      {!loading && !error && query.trim() && orders.length === 0 && (
+        <div className="muted">Sonuç bulunamadı.</div>
+      )}
+    </div>
+  );
+}

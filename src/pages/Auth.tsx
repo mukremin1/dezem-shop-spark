@@ -11,7 +11,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
-import { Chrome } from "lucide-react";
+import { Globe as Chrome } from "lucide-react";
 
 const emailSchema = z.string().email("Geçerli bir e-posta adresi giriniz");
 const passwordSchema = z.string().min(6, "Şifre en az 6 karakter olmalıdır");
