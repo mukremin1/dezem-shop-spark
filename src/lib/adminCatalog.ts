@@ -55,7 +55,7 @@ export async function listAdminProducts(
 async function loadTags(ids: string[]) {
   const { data, error } = await supabase.from("products").select("id, tags").in("id", ids);
   if (error) throw error;
-  return new Map((data ?? []).map((row) => [row.id as string, (row.tags as string[] | null) ?? []]));
+  return new Map<string, string[]>((data ?? []).map((row) => [row.id as string, ((row.tags as string[] | null) ?? []) as string[]] as [string, string[]]));
 }
 
 export async function setProductActive(id: string, isActive: boolean) {
