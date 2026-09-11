@@ -524,15 +524,14 @@ const Index = () => {
                   return (
                     <ProductCard
                       key={product.id}
-                      id={product.id}
-                      name={product.name}
-                      price={productPrice}
-                      comparePrice={productComparePrice}
-                      imageUrl={productImageUrl}
-                      slug={product.slug}
-                      isDigital={product.is_digital}
-                      stock={productStock}
-                      isAdmin={isAdmin}
+                      product={{
+                        id: product.id,
+                        name: product.name,
+                        slug: product.slug,
+                        price: productPrice,
+                        compare_price: productComparePrice,
+                        product_images: [{ image_url: productImageUrl }],
+                      }}
                     />
                   );
                 })}
