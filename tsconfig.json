@@ -21,16 +21,16 @@
     "noImplicitAny": false,
     "paths": {
       "@/*": [
-        "src/*"
+        "./src/*"
       ],
       "@components/*": [
-        "src/components/*"
+        "./src/components/*"
       ],
       "@utils/*": [
-        "src/utils/*"
+        "./src/utils/*"
       ],
       "@assets/*": [
-        "src/assets/*"
+        "./src/assets/*"
       ]
     }
   },
